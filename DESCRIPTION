@@ -1,16 +1,17 @@
 Package: CellpixR
 Type: Package
-Title: What the Package Does (Title Case)
+Title: automated analysis of nanoparticles for biotechnological applications
 Version: 0.1.0
 Authors@R: c(
     person(
-      "Jane", "Doe",
-      email = "jane@example.com",
+      "Ronja", "Tittel",
+      email = "ronja.tittel@b-tu.de",
       role = c("aut", "cre")
     )
   )
-Description: More about what it does (maybe more than one line).
-    Continuation lines should be indented.
-License: What license is it under?
+Description: Connection of functions of 'biopixR', the R package and 'Cellpose', an tool for python.
+    For easy use of both tools directly from R.
+    Tool for the automated analysis of regions of inteterest in differnet biotechnological pictures for various applications.
+License: LGPL (>=3)
 Encoding: UTF-8
 LazyData: true
