@@ -14,7 +14,7 @@
 #' normalize_name("path/to/data/This_Is_A_file_NAME_02.PNG")
 #'
 normalize_name <- function(path_or_name) {
-  if(!is.character(path_or_name) || length(path_or_name) != 1) {
+  if(!is.character(path_or_name)) {
     stop("path_or_name must be a single character string", call. = FALSE)
   }
 
