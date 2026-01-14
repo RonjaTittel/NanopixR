@@ -13,6 +13,11 @@ Description: Connection of functions of 'biopixR', the R package and 'Cellpose',
     For easy use of both tools directly from R.
     Tool for the automated analysis of regions of inteterest in differnet biotechnological pictures for various applications.
 License: LGPL (>=3)
+Imports: 
+  EBImage,
+  DT,
+  reticulate,
+  biopixR
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.3
