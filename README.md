@@ -1,6 +1,6 @@
 # First-time setup
 
-Before running _any_ analysis, run the _interactive_ setup once: 
+Before running **any** analysis, run the **interactive** setup once: 
 
 ```{r}
 library(CellpixR)
@@ -11,7 +11,7 @@ This configures the required Python / *Cellpose* environment.
 
 # in Session setup
 
-Please run at the beginning of _each_ R Session:
+Please run at the beginning of **each** R Session:
 
 ```{r}
 library(CellpixR)
