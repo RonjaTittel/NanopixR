@@ -7,10 +7,10 @@
 setup()
 }
 \value{
-Invisibly returns TRUE if the setup is completet sucsessfully
+Invisibly returns TRUE if the setup is completed successfully
 }
 \description{
-Runs an interactive setup assistant to configure the Python / Cellpose
-environment required for CellpixR. This function is intended for interactive
+Runs an interactive setup assistant to configure the Python / *Cellpose*
+environment required for *CellpixR*. This function is intended for interactive
 use only.
 }
