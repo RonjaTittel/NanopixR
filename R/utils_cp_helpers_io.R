@@ -103,6 +103,3 @@
     pixel = pixel_csv,
     converted = conv_csv))
 }
-
-
-
