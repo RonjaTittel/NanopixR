@@ -1,5 +1,5 @@
-# Help functions for the run_cellpose() Main function
-# for Cellpose setup and environment handling
+# Help functions for the 'run_cellpose()' main function
+# for 'Cellpose' setup and environment handling
 #
 # helper function used by 'run_cellpose()' to validate inputs,
 # configure the Python/ 'Cellpose' environment and construct
@@ -22,7 +22,7 @@
 }
 #
 #
-#.cp_use_python_from_option()
+# .cp_use_python_from_option()
 # Configures Python
 # If the option 'cellpose.python' is set and points to an existing Python executable, it
 # is activatet via 'reticulate::use_python()'.
@@ -35,7 +35,7 @@
 }
 #
 #
-#.cp_import_cellpose_modules()
+# .cp_import_cellpose_modules()
 # Imports the required Cellpose Python moduls
 # Importing 'Cellpose' and 'NumPy' Python moduls via reticulate. Stops if 'Cellpose' is not
 # available in the Python environment.
@@ -54,7 +54,7 @@
 }
 #
 #
-#.cp_validate_model_path
+# .cp_validate_model_path ()
 # Validating the custom Cellpose model path
 # Checks if the provided path is a single character string and if it exists.
 .cp_validate_model_path <- function(model_path) {
@@ -70,7 +70,7 @@
 }
 #
 #
-#.cp_analysis_method_text
+# .cp_analysis_method_text ()
 # Constructs a string describing the analysing method
 # Creates a description of the Cellpose analysis settings, including the model type and the object diameter.
 # For reproducible results.
