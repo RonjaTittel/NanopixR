@@ -49,7 +49,7 @@
 
   for(col in c("Perimeter", "Min_Diameter", "Max_Diameter")) {
     if(col %in% names(stats_conv)) {
-      stats_conv[[coll]] <- stats_conv[[coll]] * fx
+      stats_conv[[col]] <- stats_conv[[col]] * fx
       names(stats_conv)[names(stats_conv) == col] <- paste0(col, "_", unit_raw)
     }
   }
