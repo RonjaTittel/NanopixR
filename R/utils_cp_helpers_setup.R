@@ -11,7 +11,7 @@
 # .cp_check_folder()
 # Validates the input image folder
 # checks that the folder is a single character string and that it does exist
-.check_folder <- function(folder) {
+.cp_check_folder <- function(folder) {
   if(!is.character(folder) || length(folder) != 1) {
     stop("'folder' must be a single character string.", call. = FALSE)
   }
