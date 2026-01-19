@@ -85,7 +85,7 @@
 # output diretory
 .cp_write_results_csv <- function(Results_pixel,
                                   Results_converted = NULL,
-                                  outpur_dir,
+                                  output_dir,
                                   prefix = "Results_Cellpose") {
   if(!dir.exists(output_dir)) {
     dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
