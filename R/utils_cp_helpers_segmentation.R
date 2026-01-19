@@ -14,7 +14,7 @@
 # enabled or disabled
 .cp_create_model <- function(models,
                              model_path = NULL,
-                             pgpu = FALSE) {
+                             gpu = FALSE) {
   model_path <- .cp_validate_model_path(model_path)
   if(is.null(model_path)) {
     models$CellposeModel(gpu = gpu)
