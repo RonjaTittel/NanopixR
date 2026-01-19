@@ -2,7 +2,7 @@
 # for input and output operations in 'run_cellpose()'
 #
 # helper functions used by 'run_cellpose()' to load input images,
-# save Cellpsoe segmentation masks and write analysis results to disk
+# save 'Cellpose' segmentation masks and write analysis results to disk
 #
 # No exported functions
 #
