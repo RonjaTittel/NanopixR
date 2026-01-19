@@ -13,7 +13,8 @@
 # perimeter, circulaity, minimum and maximum diameter and center cordinates
 .cp_compute_roi_geometry <- function(mask_matrix) {
   mask_matrix[is.na(mask_matrix)] <- 0L
-  lab <- as.integer(mask_matrix)
+  lab <- mask_matrix
+  storage.mode(lab) <- "integer"
   ids <- sort(unique(lab[lab > 0L]))
 
   if(!length(ids)) {
@@ -28,7 +29,7 @@
     ))
   }
 
-  mask_img <- EBImage::image(lab, dim = dim(mask_matrix), colormode = "Grayscale")
+  mask_img <- EBImage::Image(lab, dim = dim(mask_matrix), colormode = "Grayscale")
 
   feat_shape <- as.data.frame(EBImage::computeFeatures.shape(mask_img))
   feat_shape$ROI_ID <- as.numeric(rownames(feat_shape))
