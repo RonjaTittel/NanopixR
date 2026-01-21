@@ -82,7 +82,7 @@ run_cellpose <- function(
     save_masks = TRUE,
     save_csv = TRUE
 ) {
-  .cp_check_folder(folder)
+  .check_folder(folder)
   .cp_use_python_from_option()
   mods <- .cp_import_cellpose_modules()
 
@@ -145,17 +145,20 @@ run_cellpose <- function(
   Results_converted <- NULL
 
   if(isTRUE(conversion)) {
-  Results_converted <- .cp_convert_roi_units(
+  Results_converted <- .convert_roi_units(
     Results_pixel = Results_pixel,
     scale_info = scale_info
   )
   }
 
+  csv_paths <- NULL
+
   if(isTRUE(save_csv)) {
-    .cp_write_results_csv(
-      Results_pixel = Results_pixel,
-      Results_converted = Results_converted,
-      output_dir = output_dir
+    csv_paths <- .write_results_csv(
+      results_pixel = Results_pixel,
+      results_converted = Results_converted,
+      output_dir = output_dir,
+      prefix = "Results_Cellpose"
     )
   }
 
