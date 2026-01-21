@@ -81,7 +81,8 @@ run_cellpose <- function(
     # output
     save_masks = TRUE,
     save_csv = TRUE
-) {
+    ) {
+
   .check_folder(folder)
   .cp_use_python_from_option()
   mods <- .cp_import_cellpose_modules()
