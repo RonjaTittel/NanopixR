@@ -8,20 +8,6 @@
 # No exported functions
 #
 #
-# .cp_check_folder()
-# Validates the input image folder
-# checks that the folder is a single character string and that it does exist
-.cp_check_folder <- function(folder) {
-  if(!is.character(folder) || length(folder) != 1) {
-    stop("'folder' must be a single character string.", call. = FALSE)
-  }
-  if(!dir.exists(folder)) {
-    stop("The specified folder does not exist: ", folder, call. = FALSE)
-  }
-  invisible(TRUE)
-}
-#
-#
 # .cp_use_python_from_option()
 # Configures Python
 # If the option 'cellpose.python' is set and points to an existing Python executable, it
