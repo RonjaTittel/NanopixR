@@ -18,9 +18,9 @@
 #'  }
 #' @export
 get_scales <- function(folder) {
-  if(!dir.exists(folder)) {
-    stop("Folder does not exist.", call. = FALSE)
-  }
+
+  .check_folder(folder)
+
   if(!reticulate::py_available(initialize = FALSE)) {
     stop("Python is not configured. Please restart the R Session and run setup() first.", call. = FALSE)
   }
