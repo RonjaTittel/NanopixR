@@ -119,3 +119,24 @@
     }
 Results_pixel
 }
+#
+#
+# .cp_convert_roi_units()
+# convert ROI statistics for multiple images to physical units
+# pixel based measurments (area, perimeter, diameters) into physical units
+# using specific scale information
+.cp_convert_roi_units <- function(Results_pixel,
+                                  scale_info) {
+  Results_converted <- list()
+
+  for(img_name in names(Results_pixel)) {
+    info <- scale_info[[img_name]]
+    stats <- Results_pixel[[img_name]]
+    converted <- .convert_roi_units_single(stats, info)
+
+    if(!is.null(converted)) {
+      Results_converted[[img_name]] <- converted
+    }
+  }
+  Results_converted
+}

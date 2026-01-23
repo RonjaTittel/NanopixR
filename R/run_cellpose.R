@@ -146,7 +146,7 @@ run_cellpose <- function(
   Results_converted <- NULL
 
   if(isTRUE(conversion)) {
-  Results_converted <- .convert_roi_units(
+  Results_converted <- .cp_convert_roi_units(
     Results_pixel = Results_pixel,
     scale_info = scale_info
   )
@@ -155,7 +155,7 @@ run_cellpose <- function(
   csv_paths <- NULL
 
   if(isTRUE(save_csv)) {
-    csv_paths <- .write_results_csv(
+    csv_paths <- .cp_write_results_csv(
       results_pixel = Results_pixel,
       results_converted = Results_converted,
       output_dir = output_dir,
