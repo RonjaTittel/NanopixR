@@ -16,13 +16,8 @@
 # .build_image_lookup()
 # Building a lookup table that connects image files to their normalized names
 .build_image_lookup <- function(folder) {
-  if(!is.character(folder) || length(folder) !=1) {
-    stop("folder must be a single character string", call. = FALSE)
-  }
 
-  if(!dir.exists(folder)) {
-    stop("folder does not exist", call. = FALSE)
-  }
+  .check_folder(folder)
 
   files <- list.files(
     folder,
@@ -62,4 +57,18 @@
   x <- basename(path_or_name)
   x <- tolower(x)
   tools::file_path_sans_ext(x)
+}
+#
+#
+# .check_folder()
+# Validates the input image folder
+# checks that the folder is a single character string and that it does exist
+.check_folder <- function(folder) {
+  if(!is.character(folder) || length(folder) != 1) {
+    stop("'folder' must be a single character string.", call. = FALSE)
+  }
+  if(!dir.exists(folder)) {
+    stop("The specified folder does not exist: ", folder, call. = FALSE)
+  }
+  invisible(TRUE)
 }
