@@ -77,3 +77,32 @@
       }
   invisible(out_files)
 }
+#
+#
+# .cp_write_results_csv()
+# writes the analysis results to CSV files
+# writes pixel-based and optionally converted ROI statistics to CSV files in the
+# output diretory
+.cp_write_results_csv <- function(results_pixel,
+                                  results_converted = NULL,
+                                  output_dir,
+                                  prefix) {
+
+  if(!dir.exists(output_dir)) {
+    dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+  }
+  out <- list(pixel = NULL, converted = NULL)
+
+  if(length(results_pixel)) {
+    df_pixel <- do.call(rbind, results_pixel)
+    out$pixel_csv <- file.path(output_dir, paste0(prefix, "_pixel.csv"))
+    utils::write.csv(df_pixel, out$pixel_csv, row.names = FALSE)
+  }
+
+  if(!is.null(results_converted) && length(results_converted) > 0) {
+    df_conv <- do.call(rbind, results_converted)
+    out$conv <- file.path(output_dir, paste0(prefix, "_converted.csv"))
+    utils::write.csv(df_conv, out$converted_csv, row.names = FALSE)
+  }
+  invisible(out)
+}

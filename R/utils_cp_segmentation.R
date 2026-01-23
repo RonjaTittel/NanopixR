@@ -7,6 +7,22 @@
 # No exported functions
 #
 #
+# .cp_validate_model_path ()
+# Validating the custom Cellpose model path
+# Checks if the provided path is a single character string and if it exists.
+.cp_validate_model_path <- function(model_path) {
+  if(is.null(model_path)) {
+    return(NULL)}
+  if(!is.character(model_path) || length(model_path) != 1) {
+    stop("'model_path' must be NULL or a single character string.", call. = FALSE)
+  }
+  if(!file.exists(model_path)) {
+    stop("The specified 'model_path' does not exist: ", model_path, call. = FALSE)
+  }
+  normalizePath(model_path, mustWork = TRUE)
+}
+#
+#
 # .cp_create_model()
 # Create a Cellpose model input
 # Initialising the Cellpose model that is beeing used. Either the default pretrained
