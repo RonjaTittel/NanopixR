@@ -113,7 +113,7 @@ setup_env <- function() {
   cat("Please provide the path to the Python executable of your 'cellpose' environment.\n",
       "Tip: 'conda env list' shows all environment paths.\n\n",
       "Examples:\n",
-      " - Windows: C:/Users(<USER>/miniforge3/envs/cellpose/python.exe\n",
+      " - Windows: C:/Users/<USER>/miniforge3/envs/cellpose/python.exe\n",
       " - macOS:   /Users/<USER>/miniforge3/envs/cellpose/bin/python\n",
       " - Linux:   /home/>USER>/miniforge3/envs/cellpose/bin/python\n\n", sep = "")
   python_path <- readline("Please enter the Python path (use /): ")
