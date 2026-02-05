@@ -44,8 +44,8 @@
                                   image_name,
                                   draw_axes = TRUE,
                                   draw_ids = TRUE) {
-  op <- par(mfrow = c(1, 2), mar = c(1, 1, 3, 1))
-  on.exit(par(op), add = TRUE)
+  op <- graphics::par(mfrow = c(1, 2), mar = c(1, 1, 3, 1))
+  on.exit(graphics::par(op), add = TRUE)
 
   dims <- dim(mask)
   img_height <- dims[1]
@@ -57,9 +57,9 @@
        ylim = c(0, img_height),
        asp = 1,
        axes = FALSE)
-  rasterImage(as.raster(suppressWarnings(EBImage::normalize(img))),
+  graphics::rasterImage(grDevices::as.raster(suppressWarnings(EBImage::normalize(img))),
               0, 0, img_width, img_height)
-  title(image_name, line = 1.5, cex.main = 1.2)
+  graphics::title(image_name, line = 1.5, cex.main = 1.2)
 
   # Mask
   plot(0, 0, type = "n",
@@ -67,17 +67,17 @@
        ylim = c(0, img_height),
        asp = 1,
        axes = FALSE)
-  rasterImage(as.raster(mask_color),
+  graphics::rasterImage(grDevices::as.raster(mask_color),
               0, 0, img_width, img_height)
-  title("Mask", line = 1.5, cex.main = 1.2)
+  graphics::title("Mask", line = 1.5, cex.main = 1.2)
 
   # Axes
   if(draw_axes) {
     arrow_len <- img_height * 0.2
-    arrows(0, img_height, arrow_len, img_height, col = "red", lwd = 2)
-    arrows(0, img_height, 0, img_height - arrow_len, col = "red", lwd = 2)
-    text(arrow_len * 1.1, img_height * 1.05, "Y", col = "red", cex = 0.8)
-    text(-arrow_len * 0.1, img_height - arrow_len * 1.1, "X", col = "red", cex = 0.8)
+    graphics::arrows(0, img_height, arrow_len, img_height, col = "red", lwd = 2)
+    graphics::arrows(0, img_height, 0, img_height - arrow_len, col = "red", lwd = 2)
+    graphics::text(arrow_len * 1.1, img_height * 1.05, "Y", col = "red", cex = 0.8)
+    graphics::text(-arrow_len * 0.1, img_height - arrow_len * 1.1, "X", col = "red", cex = 0.8)
   }
 
   # IDs
@@ -87,6 +87,6 @@
     text_pos <- df[df$ROI_ID %in% roi_ids, c("Centroid_X", "Centroid_Y", "ROI_ID")]
     x <- text_pos$Centroid_Y
     y <- img_width - text_pos$Centroid_X
-    text(x, y, labels = text_pos$ROI_ID, col = "grey7", cex = 0.8, font = 2)
+    graphics::text(x, y, labels = text_pos$ROI_ID, col = "grey7", cex = 0.8, font = 2)
   }
 }
