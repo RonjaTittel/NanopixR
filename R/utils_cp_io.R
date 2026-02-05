@@ -91,6 +91,7 @@
   if(!dir.exists(output_dir)) {
     dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
   }
+
   out <- list(pixel = NULL, converted = NULL)
 
   if(length(results_pixel)) {
@@ -101,7 +102,7 @@
 
   if(!is.null(results_converted) && length(results_converted) > 0) {
     df_conv <- do.call(rbind, results_converted)
-    out$conv <- file.path(output_dir, paste0(prefix, "_converted.csv"))
+    out$converted_csv <- file.path(output_dir, paste0(prefix, "_converted.csv"))
     utils::write.csv(df_conv, out$converted_csv, row.names = FALSE)
   }
   invisible(out)
