@@ -19,18 +19,23 @@
 #' @export
 get_scales <- function(folder) {
 
+  # validate input folder
   .check_folder(folder)
 
+  # validate input folder
   if(!reticulate::py_available(initialize = FALSE)) {
     stop("Python is not configured. Please restart the R Session and run setup() first.", call. = FALSE)
   }
+
+  # ensure required Python module is available
   if(!reticulate::py_module_available("ncempy")) {
     stop("Python module 'ncempy' is not available. Please install and configure einvironment.", call. = FALSE)
   }
 
+  # import Digital Micrograph reader module
   dm_mod <- reticulate::import("ncempy.io.dm", delay_load = TRUE)
 
-  # getting Image files
+  # collect supported image files
   image_files <- list.files(
     folder,
     pattern = "\\.(png|jpg|jpeg|tif|tiff|bmp)$",
@@ -38,19 +43,22 @@ get_scales <- function(folder) {
     full.names = TRUE
   )
 
+  # return empty list if no images found
   if(length(image_files) == 0) {
     return(list())
   }
 
   results <- list()
 
+  # iterate over all image files
   for(img_path in image_files) {
     img_name <- basename(img_path)
     base <- tools::file_path_sans_ext(img_name)
     base_norm <- .normalize_name(base)
+    # expected corresponding DM3 file
     dm3_path <- file.path(folder, paste0(base, ".dm3"))
 
-    # No DM3
+    # handle missing DM3 file
     if(!file.exists(dm3_path)) {
       results[[base_norm]] <- list(
         scale_x = NA,
@@ -64,11 +72,12 @@ get_scales <- function(folder) {
       next
     }
 
-    #DM3 loading
+    # attempt to load DM3 file
     dm_obj <- tryCatch({
       dm_mod$dmReader(dm3_path)
     }, error = function(e) NULL)
 
+    # handle read failure
     if(is.null(dm_obj)) {
       results[[base_norm]] <- list(
         scale_x = NA,
@@ -82,10 +91,11 @@ get_scales <- function(folder) {
       next
     }
 
-    # Pixel size and Pixel unit
+    # extract pixel size and units
     scale <- tryCatch(dm_obj[['pixelSize']], error = function(e) NA)
     units <- tryCatch(dm_obj[['pixelUnit']], error = function(e) NA)
 
+    # validate metadata format
     if(length(scale) != 2 || length(units) != 2) {
       results[[base_norm]] <- list(
         scale_x = NA,
@@ -99,16 +109,21 @@ get_scales <- function(folder) {
       next
     }
 
+    # convert scale values to numeric
     scale_x <- suppressWarnings(as.numeric(scale[[1]]))
     scale_y <- suppressWarnings(as.numeric(scale[[2]]))
     unit_x <- as.character(units[[1]])
     unit_y <- as.character(units[[2]])
+
+    # convert units to millimeter scale factors
     fx <- .unit_scale_factor(unit_x)
     fy <- .unit_scale_factor(unit_y)
 
+    # compute millimeter per pixel values
     mm_x <- if(!is.na(fx)) scale_x * fx else NA
     mm_y <- if(!is.na(fy)) scale_y * fy else NA
 
+    # store result for current image
     results[[base_norm]] <- list(
       scale_x = scale_x,
       scale_y = scale_y,
