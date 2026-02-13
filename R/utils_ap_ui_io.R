@@ -11,6 +11,8 @@
 .ap_print_summary <- function(cellpose,
                               biopixr,
                               skipped) {
+
+  # print formatted overview of image assignment
   cat("\n=====================================================\n")
   cat("Summary of planned analyses\n")
   cat("-----------------------------------------------------\n")
@@ -29,8 +31,11 @@
                                   df_converted,
                                   out_dir,
                                   verbose = TRUE) {
+
+  # ensure output directory exists
   dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
 
+  # write pixel-level results
   if(!is.null(df_pixel)) {
     pixel_csv <- file.path(out_dir, "Analysis_pixel.csv")
     utils::write.csv(df_pixel, pixel_csv, row.names = FALSE)
@@ -40,6 +45,7 @@
     }
   }
 
+  # write converted (physical unit) results
   if(!is.null(df_converted)) {
     conv_csv <- file.path(out_dir, "Analysis_converted.csv")
     utils::write.csv(df_converted, conv_csv, row.names = FALSE)
