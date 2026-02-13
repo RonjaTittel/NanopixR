@@ -89,21 +89,30 @@ run_biopixR <- function(folder,
                         write_results = TRUE
                         ) {
 
+  # validate input folder
   .check_folder(folder)
+
+  # supported image file pattern
   pattern = "\\.(png|jpg|jpeg|tif|tiff|bmp)$"
+
+  # default output file names
   csv_name_pixel = "Results_biopixR_pixel.csv"
   csv_name_converted = "Results_biopixR_converted.csv"
 
+  # ensure output directory exists
   if(!dir.exists(output_dir)) {
     dir.create(output_dir, recursive = TRUE)
   }
 
+  # prepare image table and apply optional file selection
   img_table <- .bp_prepare_image_table(folder = folder,
                                        pattern = pattern,
                                        selected_files = selected_files)
 
   files <- img_table$file
   norm_names <- img_table$norm
+
+  # validate and normalize detection method
   method <- match.arg(method)
 
   params <- .bp_validate_detection_params(method = method,
@@ -114,14 +123,17 @@ run_biopixR <- function(folder,
   alpha = params$alpha
   sigma = params$sigma
 
+  # validate size filter configuration
   size_filter <- .bp_validate_size_filter(use = use_sizefilter,
                                           lowerlimit = size_lowerlimit,
                                           upperlimit = size_upperlimit)
 
+  # validate proximity filter configuration
   prox_filter <- .bp_validate_proximity_filter(use = use_proxfilter,
                                                radius = prox_radius,
                                                elongation = prox_elongation)
 
+  # store normalized parameter set for traceability
   params <- list(folder = normalizePath(folder),
                  method = method,
                  alpha = alpha,
@@ -132,6 +144,7 @@ run_biopixR <- function(folder,
   Results_pixel <- list()
   Results_converted <- list()
 
+  # process each image sequentially
   for(i in seq_along(files)) {
     res <- tryCatch(.bp_process_one_image(img_path = files[i],
                                            normname = norm_names[i],
@@ -144,6 +157,7 @@ run_biopixR <- function(folder,
                                            conversion = conversion,
                                            scale_info = scale_info))
 
+    # store results if processing succeeded
     if(!is.null(res)) {
       Results_pixel[[norm_names[i]]] <- res$pixel
 
@@ -153,6 +167,7 @@ run_biopixR <- function(folder,
     }
   }
 
+  # optionally write combined CSV result tables
   if(write_results) {.bp_write_results_csv(results_pixel = Results_pixel,
                                            results_converted = Results_converted,
                                            output_dir = output_dir,
@@ -162,6 +177,7 @@ run_biopixR <- function(folder,
                                            write_converted = isTRUE(conversion))
   }
 
+  # return final result structure
   final_output <- list(pixel = Results_pixel,
                        converted = if(isTRUE(conversion)) Results_converted else NULL,
                        parameters = params)
