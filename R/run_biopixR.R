@@ -141,6 +141,7 @@ run_biopixR <- function(folder,
                  size_filter = size_filter,
                  proximity_filter = prox_filter)
 
+  # initialize containers for per-image results
   Results_pixel <- list()
   Results_converted <- list()
 
