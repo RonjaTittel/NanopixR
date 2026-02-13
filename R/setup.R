@@ -8,20 +8,28 @@
 #' @return Invisibly returns TRUE if the setup is completed successfully
 #' @export
 setup <- function() {
+
+  # ensure function is only executed interactively
   if(!interactive()) {
     stop("setup() ,ust be run in an interactive R session", call. = FALSE)
   }
+
+  # locate bundled setup script inside package
   script <- system.file("scripts", "setup_env.R", package = "CellpixR")
   if( script == "") {
     stop("Setup script not found", call. = FALSE)
   }
 
-  #Load the script into an temporary environment
+  # load script into isolated temporary environment
+  # avoids polluting the global workspace
   env <- new.env(parent = baseenv())
   sys.source(script, envir = env)
 
+  # ensure expected setup function exists in script
   if(!exists("setup_env", envir = env,  inherits = FALSE)) {
     stop("setup_env() not found in setup script", call. = FALSE)
   }
+
+  # execute setup routine
   env$setup_env()
 }
