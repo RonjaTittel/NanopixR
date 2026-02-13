@@ -11,14 +11,20 @@
 # Validating the custom Cellpose model path
 # Checks if the provided path is a single character string and if it exists.
 .cp_validate_model_path <- function(model_path) {
+  # allow NULL (→ use default pretrained model)
   if(is.null(model_path)) {
     return(NULL)}
+
+  # ensure valid single path string
   if(!is.character(model_path) || length(model_path) != 1) {
     stop("'model_path' must be NULL or a single character string.", call. = FALSE)
   }
+
+  # check file existence
   if(!file.exists(model_path)) {
     stop("The specified 'model_path' does not exist: ", model_path, call. = FALSE)
   }
+  # return normalized absolute path
   normalizePath(model_path, mustWork = TRUE)
 }
 #
@@ -31,7 +37,12 @@
 .cp_create_model <- function(models,
                              model_path = NULL,
                              gpu = FALSE) {
+  # validate and normalize custom model path (if provided)
   model_path <- .cp_validate_model_path(model_path)
+
+  # create model instance:
+  # - default pretrained model if NULL
+  # - custom pretrained_model otherwise
   if(is.null(model_path)) {
     models$CellposeModel(gpu = gpu)
   } else {
@@ -49,19 +60,28 @@
                             imgs_np,
                             diameter = NULL,
                             progress = FALSE) {
+
+  # validate optional diameter parameter
   if(!is.null(diameter)) {
     if(!is.numeric(diameter) || length(diameter) != 1 || diameter <= 0) {
       stop("'diameter' must be a single positive number or NULL.", call. = FALSE)
     }
+    # ensure integer type for Python (Cellpose expects int)
     diameter <- as.integer(diameter)
   }
   n_imgs <- length(imgs_np)
+  # initialize result container (one entry per image)
   res_list <- vector("list", n_imgs)
+
+  # optional progress bar
   if(isTRUE(progress)) {
     pb <- utils::txtProgressBar(min = 0, max = n_imgs, style = 3)
     on.exit(close(pb), add = TRUE)
   }
+
+  # iterate over images and evaluate model
   for(i in seq_len(n_imgs)) {
+    # model$eval expects a list of images (even for single input)
     res_list[[i]] <- model$eval(
       x = list(imgs_np[[i]]),
       diameter = diameter
