@@ -83,10 +83,16 @@ run_cellpose <- function(
     save_csv = TRUE
     ) {
 
+  # validate input folder
   .check_folder(folder)
+
+  # configure Python environment (if option is set)
   .cp_use_python_from_option()
+
+  # import required Cellpose Python modules
   mods <- .cp_import_cellpose_modules()
 
+  # load images and prepare NumPy arrays
   img_bundle <- .cp_load_images(
     folder = folder,
     io = mods$io,
@@ -98,23 +104,27 @@ run_cellpose <- function(
   imgs <- img_bundle$imgs
   files <- img_bundle$files
 
+  # validate optional diameter parameter
   if (!is.null(diameter)) {
     if(!is.numeric(diameter) || length(diameter) != 1 || diameter <= 0) {
       stop("'diameter' must be a single positiv number or NULL.", call. = FALSE)
     }
   }
 
+  # create Cellpose model (default or custom)
   model <- .cp_create_model(
     models = mods$models,
     model_path = model_path,
     gpu = gpu
   )
 
+  # build descriptive method text for traceability
   analysis_method_text <- .cp_analysis_method_text(
     model_path = model_path,
     diameter = diameter
   )
 
+  # run segmentation on all selected images
   res_list <- .cp_eval_images(
     model = model,
     imgs_np = imgs_np,
@@ -122,6 +132,7 @@ run_cellpose <- function(
     progress = interactive()
   )
 
+  # optionally save segmentation masks to disk
   if(isTRUE(save_masks)) {
     .cp_save_masks(
       io = mods$io,
@@ -132,6 +143,7 @@ run_cellpose <- function(
     )
   }
 
+  # compute pixel-level ROI statistics
   Results_pixel <- .cp_compute_roi_stats(
     res_list = res_list,
     imgs = imgs,
@@ -139,12 +151,14 @@ run_cellpose <- function(
     progress = interactive()
   )
 
+  # ensure scale info is provided if conversion is requested
   if(isTRUE(conversion) && is.null(scale_info)) {
     stop("'conversion = TRUE' requires 'scale_info' to be provided.", call. = FALSE)
   }
 
   Results_converted <- NULL
 
+  # optionally convert pixel-based measures to physical units
   if(isTRUE(conversion)) {
   Results_converted <- .cp_convert_roi_units(
     Results_pixel = Results_pixel,
@@ -154,6 +168,7 @@ run_cellpose <- function(
 
   csv_paths <- NULL
 
+  # optionally export results as CSV files
   if(isTRUE(save_csv)) {
     csv_paths <- .cp_write_results_csv(
       results_pixel = Results_pixel,
@@ -163,6 +178,7 @@ run_cellpose <- function(
     )
   }
 
+  # return result structure (pixel only or pixel + converted)
   if(isTRUE(conversion)) {
     list(
       pixel = Results_pixel,
