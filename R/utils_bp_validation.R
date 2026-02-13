@@ -11,16 +11,22 @@
 .bp_validate_detection_params <- function(method,
                                           alpha = NULL,
                                           sigma = NULL) {
+
+  # enforce allowed detection methods
   method <- match.arg(method, c("edge", "threshold"))
 
+  # edge-based detection parameters
   if(method == "edge") {
+    # apply default smoothing settings if not provided
     if(is.null(alpha)) alpha <- "gaussian"
     if(is.null(sigma)) sigma <- "gaussian"
 
+    # validate alpha parameter
     if(!(is.numeric(alpha) || (is.character(alpha) & alpha == "gaussian"))) {
       stop("'alpha' must be numeric or 'gaussian' for method = 'edge'.", call. = FALSE)
     }
 
+    # validate sigma parameter
     if(!(is.numeric(sigma) || (is.character(sigma) && sigma == "gaussian"))) {
       stop("'sigma' must be numeric or 'gaussian' for method = 'edge'.", call. = FALSE)
     }
@@ -28,12 +34,16 @@
     threshold <- NULL
   }
 
+  # threshold-based detection parameters
   if(method == "threshold") {
+    # edge parameters not applicable
     alpha <- NULL
     sigma <- NULL
+    # use automatic thresholding
     threshold <- "auto"
   }
 
+  # return normalized parameter set
   list(method = method,
        alpha = alpha,
        sigma = sigma,
@@ -48,32 +58,38 @@
 .bp_validate_size_filter <- function(use = FALSE,
                                      lowerlimit = NULL,
                                      upperlimit = NULL) {
-
+  # ensure logical activation flag
   if(!is.logical(use) || length(use) != 1) {
     stop("'use_sizefilter' must be TRUE or FALSE.", call. = FALSE)
   }
 
+  # if filter disabled → ignore limits
   if(!use) {
     return(list(use = FALSE,
       lowerlimit = NULL,
       upperlimit = NULL))
   }
 
+  # apply defaults when filter is active
   if(is.null(lowerlimit)) lowerlimit <- "auto"
   if(is.null(upperlimit)) upperlimit <- "auto"
 
+  # helper: valid limit must be numeric or "auto"
   valid_limit <- function(x) {
     is.numeric(x) || (is.character(x) && x == "auto")
   }
 
+  # validate lower bound
   if(!valid_limit(lowerlimit)) {
     stop("'size_lowerlimit' must be numeric or 'auto' when 'use_sizefilter' is TRUE.", call. = FALSE)
   }
 
+  # validate upper bound
   if(!valid_limit(upperlimit)) {
     stop("'size_upperlimit' must be numeric or 'auto' when 'use_sizefilter' is TRUE.", call. = FALSE)
   }
 
+  # return normalized configuration
   list(use = TRUE,
        lowerlimit = lowerlimit,
        upperlimit = upperlimit)
@@ -88,27 +104,37 @@
                                           radius = NULL,
                                           elongation = NULL) {
 
+  # ensure logical activation flag
   if(!is.logical(use) || length(use) != 1) {
-    stop("'use_proxfilter' must be TRUE or FALSE.", cal. = FALSE)
+    stop("'use_proxfilter' must be TRUE or FALSE.", call. = FALSE)
   }
 
+  # if filter disabled → ignore parameters
   if(!use) {
     return(list(use = FALSE,
                 radius = NULL,
                 elongation = NULL))
   }
 
+  # apply defaults when filter is active
   if(is.null(radius)) radius <- "auto"
   if(is.null(elongation)) elongation <- 2
 
-  if(!is.numeric(radius) || !(is.character(radius) && radius == "auto")) {
-    stop("'prox_radius' must be numeric or 'auto' when use_proxfilter' is TRUE.", call. = FALSE)
+  # radius must be numeric or "auto"
+  if(!(is.numeric(radius) || (is.character(radius) && radius == "auto"))) {
+    stop(
+      "'prox_radius' must be numeric or 'auto' when use_proxfilter' is TRUE."
+         , call. = FALSE)
   }
 
+  # elongation must be single numeric value
   if(!is.numeric(elongation) || length(elongation) != 1) {
-    stop("'prox_elongation' must be a single numeric value when 'use_proxfilter' is TRUE.", call. = FALSE)
+    stop(
+      "'prox_elongation' must be a single numeric value when 'use_proxfilter' is TRUE."
+      , call. = FALSE)
   }
 
+  # return normalized configuration
   list(use = TRUE,
        radius = radius,
        elongation = elongation)
