@@ -52,36 +52,46 @@ show_results <- function(results_list,
                          download = TRUE,
                          plot = TRUE,
                          verbose = TRUE) {
+
+  # validate input folder
   .check_folder(folder)
 
+  # validate image name argument
   if(missing(image_name) || !is.character(image_name) || length(image_name) != 1) {
     stop("'image_name' must be a single character string.", call. = FALSE)
   }
 
+  # validate image name argument
   lookup <- .list_images_sorted(folder)
-
   if(!image_name %in% lookup$norm) {
     stop("No results found for image: ", image_name, call. = FALSE)
   }
 
+  # ensure image exists in results list
   if(!image_name %in% names(results_list)) stop("No results found for: ", image_name, call. = FALSE)
 
   df <- results_list[[image_name]]
 
+  # stop if no ROIs were detected
   if(!nrow(df)) stop("No ROIs found for this image.", call. = FALSE)
 
+  # locate original image and corresponding mask
   paths <- .show_find_image_and_mask(folder,
                                      image_name)
 
+  # load image and mask
   img <- EBImage::readImage(paths$img_path)
   mask <- EBImage::readImage(paths$mask_path, as.is = TRUE)
   bnorm <- paths$base
+
+  # create colored mask for visualization
   mask_color <- EBImage::colorLabels(mask)
   mask_color <- suppressWarnings(EBImage::normalize(mask_color))
   dims  <- dim(mask)
   img_height <- dims[1]
   img_width <- dims[2]
 
+  # extract summary statistics if available
   total_rois <- if("Total_ROIs" %in% names(df)) {
     unique(df$Total_ROIs)[1]
   } else {
@@ -100,10 +110,12 @@ show_results <- function(results_list,
     NA_character_
   }
 
+  # ensure column exists for display consistency
   if(!"Mean_Confidence" %in% names(df)) {
     df$Mean_Confidence <- NA_real_
   }
 
+  # optional console summary
   if(verbose) {
     conf_txt <- if(is.na(overall_conf)) "NA" else overall_conf
     cat("\n", strrep("=", 50), "\n")
@@ -114,6 +126,7 @@ show_results <- function(results_list,
     cat(strrep("=", 50), "\n\n")
   }
 
+  # remove global summary columns for display table
   drop_cols <- c("Image_name",
                  "Total_ROIs",
                  "Overall_Confidence",
@@ -125,6 +138,7 @@ show_results <- function(results_list,
   caption_txt <- paste(image_name, "with", method_txt, "(Total ROIs:", total_rois,
                        ", Overall Confidence:", conf_txt, ")")
 
+  # display table interactively if possible
   if(interactive() && requireNamespace("DT", quietly = TRUE)) {
     print(DT::datatable(df_show,
                         rownames = FALSE,
@@ -135,11 +149,14 @@ show_results <- function(results_list,
     print(utils::head(df_show, 20))
   }
 
+  # optionally display overlay plot
   if(plot) {.show_plot_image_mask(img,
                                   mask,
                                   mask_color,
                                   df,
                                   image_name)}
+
+  # optionally export plot and CSV
   if(download) {
     out_dir <- file.path(folder, "Results")
     if(!dir.exists(out_dir)) {
@@ -149,6 +166,7 @@ show_results <- function(results_list,
     plot_file <- file.path(out_dir, paste0(bnorm, "_overview.png"))
     csv_file <- file.path(out_dir, paste0(bnorm, "_results.csv"))
 
+    # save overlay plot
     grDevices::png(plot_file,
         width = img_width * 2,
         height = img_height,
@@ -164,6 +182,7 @@ show_results <- function(results_list,
                           df = df,
                           image_name = image_name)
 
+    # prepare CSV export table
     df_download <- df_show
     df_download$Image_name <- image_name
     df_download$Analysis_method <- methode
