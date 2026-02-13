@@ -69,15 +69,20 @@ analysis_pip <- function(folder,
                          gpu = TRUE,
                          method_bp = c("edge", "threshold")) {
 
+  # validate input folder
   .check_folder(folder)
 
+  # step 1: extract image feature properties
   if(verbose) cat("\nExtracting image features...\n")
   properties <- .ap_extract_features(folder)
 
+  # validate extracted properties structure
   .ap_validate_properties(properties)
 
+  # build lookup table linking normalized names to files
   lookup <- .build_image_lookup(folder)
 
+  # resolve scale handling and unit conversion settings
   scale <- .ap_resolve_scale_handling(folder = folder,
                                       scale_info = scale_info,
                                       interactive = interactive,
@@ -85,11 +90,13 @@ analysis_pip <- function(folder,
   use_conversion <- scale$use_conversion
   scale_info <- scale$scale_info
 
+  # group images according to recommended method
   groups <- .ap_group_images_by_method(properties,
                                        lookup)
   cellpose_imgs <- groups$Cellpose
   biopixr_imgs <- groups$BiopixR
 
+  # resolve user decisions for Cellpose-recommended images
   res_cp <- .ap_resolve_group(images = cellpose_imgs,
                               recommended = "Cellpose",
                               interactive = interactive,
@@ -98,6 +105,7 @@ analysis_pip <- function(folder,
   biopixR_to_run <- res_cp$BiopixR
   skipped_imgs <- res_cp$Skipped
 
+  # resolve user decisions for BiopixR-recommended images
   res_bp <- .ap_resolve_group(images = biopixr_imgs,
                               recommended = "BiopixR",
                               interactive = interactive,
@@ -106,12 +114,14 @@ analysis_pip <- function(folder,
   biopixR_to_run <- c(biopixR_to_run, res_bp$BiopixR)
   skipped_imgs <- c(skipped_imgs, res_bp$Skipped)
 
+  # optionally print execution summary
   if(verbose && interactive) {
     .ap_print_summary(cellpose_to_run,
                       biopixR_to_run,
                       skipped_imgs)
   }
 
+  # execute Cellpose analysis
   Results_Cellpose <- .ap_run_method(method = "Cellpose",
                                      folder = folder,
                                      files = cellpose_to_run,
@@ -121,6 +131,7 @@ analysis_pip <- function(folder,
                                      gpu = gpu,
                                      method_bp = method_bp)
 
+  # execute BiopixR analysis
   Results_BiopixR <- .ap_run_method(method = "BiopixR",
                                     folder = folder,
                                     files = biopixR_to_run,
@@ -130,26 +141,32 @@ analysis_pip <- function(folder,
                                     gpu = gpu,
                                     method_bp = method_bp)
 
+  # merge results from both analysis pipelines
   combined <- .ap_collect_results(results_cellpose = Results_Cellpose,
                                   results_biopixr = Results_BiopixR,
                                   use_conversion = use_conversion)
   pixel_all <- combined$pixel
   converted_all <- combined$converted
 
+  # bind per-image pixel results into single data frame
   df_pixel <- if(length(pixel_all) > 0) {
     do.call(rbind, pixel_all)
   } else {NULL}
 
+  # bind converted results if enabled
   df_converted <- if(use_conversion && length(converted_all) > 0) {
     do.call(rbind, converted_all)
   } else {NULL}
 
+  # optionally write combined result tables to disk
   if(write_csv) {
     .ap_write_csv_results(df_pixel = df_pixel,
                           df_converted = df_converted,
                           out_dir = out_dir,
                           verbose = verbose)
   }
+
+  # assemble structured return object
   results <- list(
     pixel = df_pixel,
     converted = if(use_conversion) df_converted else NULL,
