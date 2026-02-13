@@ -10,15 +10,27 @@
 # conventions and returns a validated file path
 .show_find_image_and_mask <- function(folder,
                                       image_name) {
+
+  # get sorted image lookup (original paths + normalized names)
   lookup <- .list_images_sorted(folder)
+
+  # match requested normalized name to lookup table
   idx <- match(image_name, lookup$norm)
+
+  # stop if image cannot be resolved
   if(is.na(idx)) {stop("Original image not found: ", image_name, call. = FALSE)}
+
+  # full path to original image
   img_path <- lookup$file[idx]
+
+  # extract base filename (used to construct mask filenames)
   base <- tools::file_path_sans_ext(basename(img_path))
 
+  # expected mask paths (BiopixR and Cellpose conventions)
   mask_bp <- file.path(folder, "Results", paste0(base, "_bp_masks.tif"))
   mask_cp <- file.path(folder, "Results", paste0(base, "_cp_masks.tif"))
 
+  # prefer BiopixR mask if present, otherwise Cellpose
   if(file.exists(mask_bp)) {
     mask_path <- mask_bp
   } else if(file.exists(mask_cp)) {
@@ -27,6 +39,7 @@
     stop("Mask not found for image: ", base, call. = FALSE)
   }
 
+  # return resolved paths and base name
   list(img_path = img_path,
        mask_path = mask_path,
        base = base)
@@ -44,36 +57,45 @@
                                   image_name,
                                   draw_axes = TRUE,
                                   draw_ids = TRUE) {
+
+  # set 1x2 layout (image | mask) and minimal margins
   op <- graphics::par(mfrow = c(1, 2), mar = c(1, 1, 3, 1))
   on.exit(graphics::par(op), add = TRUE)
 
+  # extract mask dimensions (used for plotting coordinates)
   dims <- dim(mask)
   img_height <- dims[1]
   img_width <- dims[2]
 
   # Original image
+  # create empty plot with image coordinate system
   plot(0, 0, type = "n",
        xlim = c(0, img_width),
        ylim = c(0, img_height),
        asp = 1,
        axes = FALSE)
+  # draw normalized image as raster
   graphics::rasterImage(grDevices::as.raster(suppressWarnings(EBImage::normalize(img))),
               0, 0, img_width, img_height)
   graphics::title(image_name, line = 1.5, cex.main = 1.2)
 
   # Mask
+  # empty plot with same coordinate system
   plot(0, 0, type = "n",
        xlim = c(0, img_width),
        ylim = c(0, img_height),
        asp = 1,
        axes = FALSE)
+  # draw colored segmentation mask
   graphics::rasterImage(grDevices::as.raster(mask_color),
               0, 0, img_width, img_height)
   graphics::title("Mask", line = 1.5, cex.main = 1.2)
 
   # Axes
   if(draw_axes) {
+    # arrow length relative to image size
     arrow_len <- img_height * 0.2
+    # draw Y and X direction arrows (top-left origin)
     graphics::arrows(0, img_height, arrow_len, img_height, col = "red", lwd = 2)
     graphics::arrows(0, img_height, 0, img_height - arrow_len, col = "red", lwd = 2)
     graphics::text(arrow_len * 1.1, img_height * 1.05, "Y", col = "red", cex = 0.8)
@@ -82,11 +104,17 @@
 
   # IDs
   if(draw_ids && all(c("Centroid_X", "Centroid_Y", "ROI_ID") %in% names(df))) {
+    # extract integer mask labels
     mask_int <- as.integer(EBImage::imageData(mask))
+    # get all non-background ROI IDs
     roi_ids <- sort(unique(mask_int[mask_int > 0]))
+    # match centroid positions for visible ROIs
     text_pos <- df[df$ROI_ID %in% roi_ids, c("Centroid_X", "Centroid_Y", "ROI_ID")]
+    # convert coordinates:
+    # EBImage origin (top-left) → base R plot origin (bottom-left)
     x <- text_pos$Centroid_Y
     y <- img_width - text_pos$Centroid_X
+    # draw ROI labels on mask panel
     graphics::text(x, y, labels = text_pos$ROI_ID, col = "grey7", cex = 0.8, font = 2)
   }
 }
