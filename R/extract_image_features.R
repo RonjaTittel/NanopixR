@@ -63,44 +63,54 @@ extract_image_features <- function(folder,
                                    round_digits = 5,
                                    verbose = TRUE) {
 
+  # validate input folder
   .check_folder(folder)
 
   if(isTRUE(verbose)) {
     message("Loading images")
   }
 
+  # load all readable images and assign normalized names
   imgs <- .ex_load_images(folder)
   norm_names <- names(imgs)
 
+  # stop if no images could be read
   if(length(imgs) == 0) {
     stop("No readable images found in the folder.")
   }
 
+  # determine color mode and inter-channel differences
   color_info <- t(sapply(imgs,
                          .ex_check_color_mode))
 
+  # compute histogram-based intensity features
   hist_stats <- t(vapply(imgs,
                          .ex_analyze_hist_features,
                          FUN.VALUE = c(skewness = 0, kurtosis = 0)))
 
+  # compute gradient- and frequency-based features
   results <- .ex_analyze_image_list(imgs,
                                     edge_q = 0.9,
                                     high_cut = 0.25,
                                     verbose = verbose)
 
+  # round numeric feature columns for stable output
   results_round <- .ex_round_numeric_df(results,
                                         digits = round_digits)
 
+  # assemble unified properties table
   Properties <- .ex_build_properties_table(norm_names = norm_names,
                                            color_info = color_info,
                                            hist_stats = hist_stats,
                                            results_round = results_round)
 
+  # determine recommended analysis method per image
   Decision <- .ex_choose_method(Properties)
 
   Properties$Recommended_method <- Decision$Recommended_method
   Properties$Decision_justification <- Decision$Decision_justification
 
+  # optionally export properties table to CSV
   if(isTRUE(export_csv)) {
     .ex_export_properties(Properties,
                           folder = folder,
@@ -112,6 +122,7 @@ extract_image_features <- function(folder,
     message("Analysis completed")
   }
 
+  # assign custom class for downstream method handling
   class(Properties) <- c("extract_image_features", class(Properties))
   return(Properties)
 }
