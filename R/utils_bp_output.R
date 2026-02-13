@@ -15,20 +15,25 @@
                                   write_pixel = TRUE,
                                   write_converted = TRUE) {
 
+  # write pixel-level results if requested and available
   if(write_pixel && length(results_pixel)) {
+    # combine per-image pixel tables into single data frame
     df_pixel <- do.call(rbind, results_pixel)
     utils::write.csv(df_pixel,
                      file.path(output_dir, csv_name_pixel),
                      row.names = FALSE)
   }
 
+  # write converted (physical unit) results if requested and available
   if(write_converted && !is.null(results_converted) && length(results_converted)) {
+    # combine per-image converted tables
     df_conv <- do.call(rbind, results_converted)
     utils::write.csv(df_conv,
                      file.path(output_dir, csv_name_converted),
                      row.names = FALSE)
   }
 
+  # return silently (used only for side effects)
   invisible(TRUE)
 }
 #
@@ -41,8 +46,11 @@
                                       sigma = NULL,
                                       size_filter,
                                       prox_filter) {
+
+  # initialize descriptor with base method name
   parts <- c("BiopixR")
 
+  # encode detection method and its parameters
   if(method == "edge") {
     parts <- c(parts,
                paste0("method=edge"),
@@ -52,15 +60,18 @@
     parts <- c(parts, "method=threshold")
   }
 
+  # append size filter configuration if active
   if(size_filter$use) {
     parts <- c(parts,
                paste0("sizeFilter=", size_filter$lowerlimit, "-", size_filter$upperlimit))
   }
 
+  # append proximity filter configuration if active
   if(prox_filter$use) {
     parts <- c(parts,
                paste0("proximityFilter=", prox_filter$radius, "-", prox_filter$elongation))
   }
 
+  # collapse all parts into single reproducible string
   paste(parts, collapse = "; ")
 }
