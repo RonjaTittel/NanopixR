@@ -1,6 +1,3 @@
-library(CellpixR)
-library(testthat)
-
 
 test_that("analysis_pip() errors on missing folder", {
   expect_error(analysis_pip(folder = "Not_existing"), "exist|found")

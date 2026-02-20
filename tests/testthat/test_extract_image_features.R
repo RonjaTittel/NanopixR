@@ -1,6 +1,3 @@
-library(CellpixR)
-library(testthat)
-
 
 test_that("extract_image_features errors on missing folder", {
   expect_error(extract_image_features("definitely_not_existing"), "does not exist|folder", ignore.case = TRUE)
