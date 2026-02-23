@@ -1,4 +1,6 @@
 
+skip_if_not(is_integration_enabled(), "Integration tests disabled (set CELLPIXR_INTEGRATION=true).")
+
 test_that("get_scales errors on invalid folder (checked before python)", {
   expect_error(get_scales(1), "single character", ignore.case = TRUE)
   expect_error(get_scales("definitely_not_existing"), "does not exist", ignore.case = TRUE)
