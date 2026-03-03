@@ -6,7 +6,7 @@
 \usage{
 extract_image_features(
   folder,
-  export_csv = FALSE,
+  export_csv = TRUE,
   csv_name = "Properties.csv",
   round_digits = 5,
   verbose = TRUE
