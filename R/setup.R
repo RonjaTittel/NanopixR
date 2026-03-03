@@ -11,7 +11,7 @@ setup <- function() {
 
   # ensure function is only executed interactively
   if(!interactive()) {
-    stop("setup() ,ust be run in an interactive R session", call. = FALSE)
+    stop("setup() must be run in an interactive R session", call. = FALSE)
   }
 
   # locate bundled setup script inside package
