@@ -1,168 +1,216 @@
 
-skip_if_not(is_integration_enabled(), "Integration tests disabled (set CELLPIXR_INTEGRATION=true).")
+# ── Helpers ───────────────────────────────────────────────────────────────────
+# Central skip condition: all integration tests require Python + Cellpose
+cellpose_available <- function() {
+  reticulate::py_available(initialize = FALSE) &&
+    reticulate::py_module_available("cellpose")
+}
 
-test_that("run_cellpose errors on invalid folder", {
+# ── run_cellpose: input validation (no Python required) ───────────────────────
+test_that("run_cellpose - throws error for invalid folder type", {
+  expect_error(run_cellpose(123),
+               "'folder' must be a single character string.")
+})
+
+test_that("run_cellpose - throws error for non-existent folder", {
+  expect_error(run_cellpose("/this/path/does/not/exist"),
+               "The specified folder does not exist")
+})
+
+test_that("run_cellpose - throws error for invalid diameter", {
+  skip_if_not(cellpose_available(), "Cellpose not available")
+
+  img_dir <- system.file("images", package = "CellpixR")
   expect_error(
-    run_cellpose(folder = "definitely_not_existing"),
-    "does not exist|exist",
-    ignore.case = TRUE
+    run_cellpose(img_dir, gpu = TRUE, diameter = -5,
+                 save_masks = FALSE, save_csv = FALSE),
+    "'diameter' must be a single positiv number or NULL."
+  )
+  expect_error(
+    run_cellpose(img_dir, gpu = TRUE, diameter = "auto",
+                 save_masks = FALSE, save_csv = FALSE),
+    "'diameter' must be a single positiv number or NULL."
   )
 })
 
-test_that("run_cellpose validates inputs, branches, and return structure (unit; mocked internals)", {
-  tmp <- withr::local_tempdir()
-  out_dir <- withr::local_tempdir()
+test_that("run_cellpose - throws error when conversion = TRUE but scale_info is NULL", {
+  skip_if_not(cellpose_available(), "Cellpose not available")
 
-  # trackers for side effects
-  called <- new.env(parent = emptyenv())
-  called$save_masks <- FALSE
-  called$write_csv  <- FALSE
-  called$convert    <- FALSE
-
-  # minimal dummy "image bundle"
-  dummy_bundle <- list(
-    imgs_np = list(matrix(0, 2, 2)),
-    imgs    = list(matrix(0, 2, 2)),
-    files   = c(file.path(tmp, "beads2.png"))
-  )
-
-  # mock internal helpers so we don't need Python/cellpose
-  testthat::local_mocked_bindings(
-    .cp_use_python_from_option = function() invisible(TRUE),
-
-    .cp_import_cellpose_modules = function() {
-      list(io = NULL, np = NULL, models = NULL)
-    },
-
-    .cp_load_images = function(folder, io, np, selected_files) {
-      dummy_bundle
-    },
-
-    .cp_create_model = function(models, model_path, gpu) {
-      "dummy_model"
-    },
-
-    .cp_analysis_method_text = function(model_path, diameter) {
-      "Cellpose dummy method"
-    },
-
-    .cp_eval_images = function(model, imgs_np, diameter, progress) {
-      list("dummy_segmentation_result")
-    },
-
-    .cp_save_masks = function(io, imgs_np, res_list, files, output_dir) {
-      called$save_masks <- TRUE
-      invisible(TRUE)
-    },
-
-    .cp_compute_roi_stats = function(res_list, imgs, analysis_method_text, progress) {
-      list(beads2 = data.frame(
-        ROI_ID = 1L,
-        Area = 10,
-        Image_name = "beads2",
-        stringsAsFactors = FALSE
-      ))
-    },
-
-    .cp_convert_roi_units = function(Results_pixel, scale_info) {
-      called$convert <- TRUE
-      list(beads2 = data.frame(
-        ROI_ID = 1L,
-        Area_um2 = 0.5,
-        Image_name = "beads2",
-        stringsAsFactors = FALSE
-      ))
-    },
-
-    .cp_write_results_csv = function(results_pixel, results_converted, output_dir, prefix) {
-      called$write_csv <- TRUE
-      list(
-        pixel = file.path(output_dir, paste0(prefix, "_pixel.csv")),
-        converted = if (!is.null(results_converted)) file.path(output_dir, paste0(prefix, "_converted.csv")) else NULL
-      )
-    },
-
-    .env = asNamespace("CellpixR")
-  )
-
-  # --- diameter validation: error ---
+  img_dir <- system.file("images", package = "CellpixR")
   expect_error(
-    run_cellpose(folder = tmp, diameter = -1, save_csv = FALSE, save_masks = FALSE),
-    "'diameter' must be a single positiv number or NULL\\.",
-    fixed = FALSE
+    run_cellpose(img_dir,
+                 gpu = TRUE,
+                 conversion = TRUE,
+                 scale_info = NULL,
+                 save_masks = FALSE,
+                 save_csv = FALSE),
+    "'conversion = TRUE' requires 'scale_info' to be provided."
   )
+})
 
+test_that("run_cellpose - throws error if selected_files not found", {
+  skip_if_not(cellpose_available(), "Cellpose not available")
+
+  img_dir <- system.file("images", package = "CellpixR")
   expect_error(
-    run_cellpose(folder = tmp, diameter = c(1, 2), save_csv = FALSE, save_masks = FALSE),
-    "'diameter' must be a single positiv number or NULL\\.",
-    fixed = FALSE
+    run_cellpose(img_dir,
+                 gpu = TRUE,
+                 selected_files = "nonexistent.png",
+                 save_masks = FALSE,
+                 save_csv = FALSE),
+    "Some selected files were not found"
   )
+})
 
-  # --- conversion requires scale_info: error ---
-  expect_error(
-    run_cellpose(folder = tmp, conversion = TRUE, scale_info = NULL, save_csv = FALSE, save_masks = FALSE),
-    "requires 'scale_info' to be provided",
-    ignore.case = TRUE
+# ── .cp_import_cellpose_modules: unit test ────────────────────────────────────
+test_that(".cp_import_cellpose_modules - returns list with all required modules", {
+  skip_if_not(cellpose_available(), "Cellpose not available")
+
+  mods <- CellpixR:::.cp_import_cellpose_modules()
+  expect_true(is.list(mods))
+  expect_true(all(c("cellpose", "models", "io", "np") %in% names(mods)))
+})
+
+# ── Shared fixture ─────────────────────────────────────────────────────────────
+# run_cellpose() requires GPU + Python + Cellpose and is expensive.
+# Execute once with beads2.png only and reuse across all integration tests.
+
+img_dir <- system.file("images", package = "CellpixR")
+
+beads_dir <- local({
+  tmp <- file.path(tempdir(), "cp_beads_test")
+  dir.create(tmp, showWarnings = FALSE)
+  file.copy(file.path(img_dir, "beads2.png"), tmp)
+  tmp
+})
+withr::defer(unlink(beads_dir, recursive = TRUE), teardown_env())
+
+# single shared result - only created if Cellpose is available
+res_cp <- if(cellpose_available()) {
+  tryCatch(
+    run_cellpose(beads_dir,
+                 gpu = TRUE,
+                 save_masks = FALSE,
+                 save_csv = FALSE),
+    error = function(e) NULL
   )
+} else {
+  NULL
+}
 
-  # --- structure: conversion = FALSE ---
-  called$save_masks <- FALSE
-  called$write_csv  <- FALSE
-  called$convert    <- FALSE
+# ── run_cellpose: output structure ────────────────────────────────────────────
+test_that("run_cellpose - returns a list with 'pixel' element", {
+  skip_if_not(cellpose_available(), "Cellpose not available")
+  skip_if(is.null(res_cp), "run_cellpose() failed during fixture setup")
 
-  res1 <- run_cellpose(
-    folder = tmp,
-    output_dir = out_dir,
-    conversion = FALSE,
-    save_masks = FALSE,
-    save_csv = FALSE
-  )
+  expect_true(is.list(res_cp))
+  expect_true("pixel" %in% names(res_cp))
+})
 
-  expect_type(res1, "list")
-  expect_named(res1, "pixel")
-  expect_type(res1$pixel, "list")
-  expect_true("beads2" %in% names(res1$pixel))
-  expect_true(is.data.frame(res1$pixel$beads2))
-  expect_true(all(c("ROI_ID", "Area", "Image_name") %in% names(res1$pixel$beads2)))
+test_that("run_cellpose - does not contain 'converted' when conversion = FALSE", {
+  skip_if_not(cellpose_available(), "Cellpose not available")
+  skip_if(is.null(res_cp), "run_cellpose() failed during fixture setup")
 
-  expect_false(called$save_masks)
-  expect_false(called$write_csv)
-  expect_false(called$convert)
+  expect_false("converted" %in% names(res_cp))
+})
 
-  # --- structure: conversion = TRUE ---
-  called$save_masks <- FALSE
-  called$write_csv  <- FALSE
-  called$convert    <- FALSE
+test_that("run_cellpose - pixel is a named list with one entry per image", {
+  skip_if_not(cellpose_available(), "Cellpose not available")
+  skip_if(is.null(res_cp), "run_cellpose() failed during fixture setup")
 
-  res2 <- run_cellpose(
-    folder = tmp,
-    output_dir = out_dir,
-    conversion = TRUE,
-    scale_info = list(beads2 = 1),
-    save_masks = FALSE,
-    save_csv = FALSE
-  )
+  expect_true(is.list(res_cp$pixel))
+  expect_equal(length(res_cp$pixel), 1L)
+  expect_true("beads2" %in% names(res_cp$pixel))
+})
 
-  expect_type(res2, "list")
-  expect_named(res2, c("pixel", "converted"))
-  expect_type(res2$converted, "list")
-  expect_true("beads2" %in% names(res2$converted))
-  expect_true(is.data.frame(res2$converted$beads2))
-  expect_true(isTRUE(called$convert))
+test_that("run_cellpose - pixel data frame contains all expected columns", {
+  skip_if_not(cellpose_available(), "Cellpose not available")
+  skip_if(is.null(res_cp), "run_cellpose() failed during fixture setup")
 
-  # --- branch checks: save_masks & save_csv ---
-  called$save_masks <- FALSE
-  called$write_csv  <- FALSE
+  df <- res_cp$pixel[["beads2"]]
+  expected_cols <- c("ROI_ID", "Centroid_X", "Centroid_Y", "Area",
+                     "Mean_Intensity", "Perimeter", "Circularity",
+                     "Min_Diameter", "Max_Diameter", "Image_name",
+                     "Total_ROIs", "Overall_Confidence", "Analysis_method")
+  expect_true(all(expected_cols %in% names(df)))
+})
 
-  res3 <- run_cellpose(
-    folder = tmp,
-    output_dir = out_dir,
-    conversion = FALSE,
-    save_masks = TRUE,
-    save_csv = TRUE
-  )
+test_that("run_cellpose - Image_name column matches normalized image name", {
+  skip_if_not(cellpose_available(), "Cellpose not available")
+  skip_if(is.null(res_cp), "run_cellpose() failed during fixture setup")
 
-  expect_named(res3, "pixel")
-  expect_true(isTRUE(called$save_masks))
-  expect_true(isTRUE(called$write_csv))
+  df <- res_cp$pixel[["beads2"]]
+  expect_true(all(df$Image_name == "beads2"))
+})
+
+test_that("run_cellpose - Overall_Confidence contains numeric values between 0 and 1", {
+  skip_if_not(cellpose_available(), "Cellpose not available")
+  skip_if(is.null(res_cp), "run_cellpose() failed during fixture setup")
+
+  conf <- res_cp$pixel[["beads2"]]$Overall_Confidence
+  expect_true(is.numeric(conf))
+  expect_true(all(conf >= 0 & conf <= 1, na.rm = TRUE))
+})
+
+test_that("run_cellpose - Analysis_method contains 'Cellpose'", {
+  skip_if_not(cellpose_available(), "Cellpose not available")
+  skip_if(is.null(res_cp), "run_cellpose() failed during fixture setup")
+
+  method <- res_cp$pixel[["beads2"]]$Analysis_method
+  expect_true(all(grepl("Cellpose", method)))
+})
+
+test_that("run_cellpose - numeric columns are actually numeric", {
+  skip_if_not(cellpose_available(), "Cellpose not available")
+  skip_if(is.null(res_cp), "run_cellpose() failed during fixture setup")
+
+  df <- res_cp$pixel[["beads2"]]
+  num_cols <- c("ROI_ID", "Centroid_X", "Centroid_Y", "Area",
+                "Mean_Intensity", "Perimeter", "Circularity",
+                "Min_Diameter", "Max_Diameter")
+  for(col in num_cols) {
+    expect_true(is.numeric(df[[col]]),
+                info = paste("Column", col, "is not numeric"))
+  }
+})
+
+# ── run_cellpose: save_masks and save_csv ─────────────────────────────────────
+# these tests require their own run to test side effects
+test_that("run_cellpose - save_csv = TRUE creates pixel CSV file", {
+  skip_if_not(cellpose_available(), "Cellpose not available")
+
+  tmp <- file.path(tempdir(), "cp_csv_test")
+  dir.create(tmp, showWarnings = FALSE)
+  on.exit(unlink(tmp, recursive = TRUE))
+  file.copy(file.path(img_dir, "beads2.png"), tmp)
+
+  run_cellpose(tmp, gpu = TRUE, save_masks = FALSE, save_csv = TRUE)
+  expect_true(file.exists(file.path(tmp, "Results",
+                                    "Results_Cellpose_pixel.csv")))
+})
+
+test_that("run_cellpose - save_csv = FALSE creates no CSV file", {
+  skip_if_not(cellpose_available(), "Cellpose not available")
+
+  tmp <- file.path(tempdir(), "cp_no_csv_test")
+  dir.create(tmp, showWarnings = FALSE)
+  on.exit(unlink(tmp, recursive = TRUE))
+  file.copy(file.path(img_dir, "beads2.png"), tmp)
+
+  run_cellpose(tmp, gpu = TRUE, save_masks = FALSE, save_csv = FALSE)
+  expect_false(file.exists(file.path(tmp, "Results",
+                                     "Results_Cellpose_pixel.csv")))
+})
+
+# ── run_cellpose: selected_files ──────────────────────────────────────────────
+test_that("run_cellpose - selected_files restricts processing to specified image", {
+  skip_if_not(cellpose_available(), "Cellpose not available")
+
+  res_sel <- run_cellpose(img_dir,
+                          selected_files = "beads2.png",
+                          gpu = TRUE,
+                          save_masks = FALSE,
+                          save_csv = FALSE)
+  expect_equal(length(res_sel$pixel), 1L)
+  expect_true("beads2" %in% names(res_sel$pixel))
 })

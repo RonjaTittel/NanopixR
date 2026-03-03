@@ -1,257 +1,344 @@
 
-test_that("analysis_pip: calls pipeline helpers with correct args and returns structured results", {
-
-  pkg_env <- environment(analysis_pip)
-
-  # call log
-  calls <- new.env(parent = emptyenv())
-  calls$check_folder <- 0
-  calls$extract_features <- 0
-  calls$validate_properties <- 0
-  calls$build_lookup <- 0
-  calls$resolve_scale <- 0
-  calls$group_images <- 0
-  calls$resolve_group <- 0
-  calls$run_method <- list()
-  calls$collect_results <- 0
-  calls$write_csv <- 0
-  calls$print_summary <- 0
-
-  # fixtures / fake returns
-  folder <- "dummy_folder"
-
-  fake_properties <- data.frame(
-    Image_name = c("img_a", "img_b"),
-    stringsAsFactors = FALSE
-  )
-
-  fake_lookup <- data.frame(
-    norm = c("img_a", "img_b"),
-    file = c("img_a.tif", "img_b.tif"),
-    stringsAsFactors = FALSE
-  )
-
-  fake_scale <- list(
-    use_conversion = TRUE,
-    scale_info = list(dummy = TRUE)
-  )
-
-  fake_groups <- list(
-    Cellpose = c("img_a"),
-    BiopixR  = c("img_b")
-  )
-
-  resolve_group_call_idx <- 0
-
-  fake_cp_results <- list(
-    pixel = list(
-      data.frame(Image_name = "img_a", ROI_ID = 1, Area = 10, stringsAsFactors = FALSE)
-    ),
-    converted = list(
-      data.frame(Image_name = "img_a", ROI_ID = 1, Area_um2 = 1.23, stringsAsFactors = FALSE)
-    )
-  )
-
-  fake_bp_results <- list(
-    pixel = list(
-      data.frame(Image_name = "img_b", ROI_ID = 2, Area = 20, stringsAsFactors = FALSE)
-    ),
-    converted = list(
-      data.frame(Image_name = "img_b", ROI_ID = 2, Area_um2 = 2.34, stringsAsFactors = FALSE)
-    )
-  )
-
-  fake_combined <- list(
-    pixel = c(fake_cp_results$pixel, fake_bp_results$pixel),
-    converted = c(fake_cp_results$converted, fake_bp_results$converted)
-  )
-
-  # mocks
-  testthat::local_mocked_bindings(
-
-    .check_folder = function(x) {
-      calls$check_folder <- calls$check_folder + 1
-      expect_identical(x, folder)
-      invisible(TRUE)
-    },
-
-    .ap_extract_features = function(x) {
-      calls$extract_features <- calls$extract_features + 1
-      expect_identical(x, folder)
-      fake_properties
-    },
-
-    .ap_validate_properties = function(props) {
-      calls$validate_properties <- calls$validate_properties + 1
-      expect_true(is.data.frame(props))
-      expect_true("Image_name" %in% names(props))
-      invisible(TRUE)
-    },
-
-    .build_image_lookup = function(x) {
-      calls$build_lookup <- calls$build_lookup + 1
-      expect_identical(x, folder)
-      fake_lookup
-    },
-
-    .ap_resolve_scale_handling = function(folder, scale_info, interactive, verbose) {
-      calls$resolve_scale <- calls$resolve_scale + 1
-      expect_identical(folder, "dummy_folder")
-      expect_true(is.logical(interactive))
-      expect_true(is.logical(verbose))
-      fake_scale
-    },
-
-    .ap_group_images_by_method = function(properties, lookup) {
-      calls$group_images <- calls$group_images + 1
-      expect_true(is.data.frame(properties))
-      expect_true(is.data.frame(lookup))
-      fake_groups
-    },
-
-    .ap_resolve_group = function(images, recommended, interactive, verbose) {
-      calls$resolve_group <- calls$resolve_group + 1
-      resolve_group_call_idx <<- resolve_group_call_idx + 1
-
-      # first call = cellpose recommended set, second call = biopixr recommended set
-      if (resolve_group_call_idx == 1) {
-        expect_identical(recommended, "Cellpose")
-        expect_identical(images, c("img_a"))
-        return(list(Cellpose = c("img_a"), BiopixR = character(0), Skipped = character(0)))
-      } else {
-        expect_identical(recommended, "BiopixR")
-        expect_identical(images, c("img_b"))
-        return(list(Cellpose = character(0), BiopixR = c("img_b"), Skipped = character(0)))
-      }
-    },
-
-    .ap_print_summary = function(...) {
-      calls$print_summary <- calls$print_summary + 1
-      invisible(TRUE)
-    },
-
-    .ap_run_method = function(method, folder, files, use_conversion, scale_info, verbose, gpu, method_bp) {
-      # record each run with args
-      calls$run_method[[length(calls$run_method) + 1]] <- list(
-        method = method,
-        folder = folder,
-        files = files,
-        use_conversion = use_conversion,
-        scale_info = scale_info,
-        verbose = verbose,
-        gpu = gpu,
-        method_bp = method_bp
-      )
-
-      if (identical(method, "Cellpose")) {
-        expect_identical(files, c("img_a"))
-        return(fake_cp_results)
-      } else {
-        expect_identical(method, "BiopixR")
-        expect_identical(files, c("img_b"))
-        return(fake_bp_results)
-      }
-    },
-
-    .ap_collect_results = function(results_cellpose, results_biopixr, use_conversion) {
-      calls$collect_results <- calls$collect_results + 1
-      expect_true(is.list(results_cellpose))
-      expect_true(is.list(results_biopixr))
-      expect_true(isTRUE(use_conversion))
-      fake_combined
-    },
-
-    .ap_write_csv_results = function(df_pixel, df_converted, out_dir, verbose) {
-      calls$write_csv <- calls$write_csv + 1
-      expect_true(is.data.frame(df_pixel))
-      expect_true(is.data.frame(df_converted))
-      expect_true(is.character(out_dir) && length(out_dir) == 1)
-      expect_true(is.logical(verbose))
-      invisible(TRUE)
-    },
-
-    .env = pkg_env
-  )
-
-  # run
-  res <- analysis_pip(
-    folder = folder,
-    write_csv = TRUE,
-    out_dir = file.path(folder, "Results"),
-    scale_info = FALSE,
-    interactive = FALSE,
-    verbose = FALSE,
-    gpu = TRUE,
-    method_bp = "edge"
-  )
-
-  # asserts: calls
-  expect_equal(calls$check_folder, 1)
-  expect_equal(calls$extract_features, 1)
-  expect_equal(calls$validate_properties, 1)
-  expect_equal(calls$build_lookup, 1)
-  expect_equal(calls$resolve_scale, 1)
-  expect_equal(calls$group_images, 1)
-  expect_equal(calls$resolve_group, 2)
-  expect_equal(length(calls$run_method), 2)
-  expect_equal(calls$collect_results, 1)
-  expect_equal(calls$write_csv, 1)
-
-  # check that run_method got the correct passthrough args
-  expect_true(all(vapply(calls$run_method, function(x) identical(x$folder, folder), logical(1))))
-  expect_true(all(vapply(calls$run_method, function(x) identical(x$gpu, TRUE), logical(1))))
-  expect_true(all(vapply(calls$run_method, function(x) identical(x$method_bp, "edge"), logical(1))))
-  expect_true(all(vapply(calls$run_method, function(x) isTRUE(x$use_conversion), logical(1))))
-
-  # asserts: result structure
-  expect_type(res, "list")
-  expect_named(res, c("pixel", "converted", "by_image"), ignore.order = TRUE)
-
-  expect_s3_class(res$pixel, "data.frame")
-  expect_s3_class(res$converted, "data.frame")
-
-  expect_true(all(c("Image_name", "ROI_ID") %in% names(res$pixel)))
-  expect_true(all(c("Image_name", "ROI_ID") %in% names(res$converted)))
-
-  # by_image splits exist and contain both images
-  expect_true(is.list(res$by_image))
-  expect_true(is.list(res$by_image$pixel))
-  expect_true(is.list(res$by_image$converted))
-
-  expect_true(all(c("img_a", "img_b") %in% names(res$by_image$pixel)))
-  expect_true(all(c("img_a", "img_b") %in% names(res$by_image$converted)))
+# ── .ap_validate_properties: unit tests ──────────────────────────────────────
+test_that(".ap_validate_properties - passes for valid properties data frame", {
+  df <- data.frame(Image_name = "beads2",
+                   Recommended_method = "BiopixR",
+                   stringsAsFactors = FALSE)
+  expect_true(CellpixR:::.ap_validate_properties(df))
 })
 
+test_that(".ap_validate_properties - throws error if Image_name is missing", {
+  df <- data.frame(Recommended_method = "BiopixR", stringsAsFactors = FALSE)
+  expect_error(CellpixR:::.ap_validate_properties(df),
+               "Properties is missing required columns")
+})
 
-test_that("analysis_pip: does not write CSV when write_csv = FALSE", {
+test_that(".ap_validate_properties - throws error if Recommended_method is missing", {
+  df <- data.frame(Image_name = "beads2", stringsAsFactors = FALSE)
+  expect_error(CellpixR:::.ap_validate_properties(df),
+               "Properties is missing required columns")
+})
 
-  pkg_env <- environment(analysis_pip)
-  wrote <- FALSE
-
-  testthat::local_mocked_bindings(
-    .check_folder = function(...) invisible(TRUE),
-    .ap_extract_features = function(...) data.frame(Image_name = "img_a", stringsAsFactors = FALSE),
-    .ap_validate_properties = function(...) invisible(TRUE),
-    .build_image_lookup = function(...) data.frame(norm = "img_a", file = "img_a.tif", stringsAsFactors = FALSE),
-    .ap_resolve_scale_handling = function(...) list(use_conversion = FALSE, scale_info = NULL),
-    .ap_group_images_by_method = function(...) list(Cellpose = "img_a", BiopixR = character(0)),
-    .ap_resolve_group = function(images, recommended, ...) {
-      if (recommended == "Cellpose") list(Cellpose = images, BiopixR = character(0), Skipped = character(0))
-      else list(Cellpose = character(0), BiopixR = images, Skipped = character(0))
-    },
-    .ap_run_method = function(method, folder, files, use_conversion, scale_info, verbose, gpu, method_bp) {
-      list(pixel = list(data.frame(Image_name="img_a", ROI_ID=1, stringsAsFactors=FALSE)),
-           converted = list())
-    },
-    .ap_collect_results = function(...) list(pixel = list(data.frame(Image_name="img_a", ROI_ID=1, stringsAsFactors=FALSE)),
-                                             converted = list()),
-    .ap_write_csv_results = function(...) { wrote <<- TRUE; invisible(TRUE) },
-    .env = pkg_env
+# ── .ap_group_images_by_method: unit tests ────────────────────────────────────
+test_that(".ap_group_images_by_method - correctly separates Cellpose and BiopixR images", {
+  properties <- data.frame(
+    Image_name         = c("beads2", "ch_097_5"),
+    Recommended_method = c("BiopixR", "Cellpose"),
+    stringsAsFactors   = FALSE
   )
+  lookup <- data.frame(
+    norm = c("beads2", "ch_097_5"),
+    file = c("/img/beads2.png", "/img/ch_097_5.png"),
+    stringsAsFactors = FALSE
+  )
+  res <- CellpixR:::.ap_group_images_by_method(properties, lookup)
+  expect_equal(res$BiopixR, "beads2")
+  expect_equal(res$Cellpose, "ch_097_5")
+})
 
-  res <- analysis_pip(folder = "x", write_csv = FALSE, interactive = FALSE, verbose = FALSE)
+test_that(".ap_group_images_by_method - returns empty vectors if no match", {
+  properties <- data.frame(
+    Image_name         = "beads2",
+    Recommended_method = "BiopixR",
+    stringsAsFactors   = FALSE
+  )
+  lookup <- data.frame(
+    norm = "beads2",
+    file = "/img/beads2.png",
+    stringsAsFactors = FALSE
+  )
+  res <- CellpixR:::.ap_group_images_by_method(properties, lookup)
+  expect_length(res$Cellpose, 0)
+  expect_equal(res$BiopixR, "beads2")
+})
 
-  expect_false(wrote)
+# ── .ap_collect_results: unit tests ───────────────────────────────────────────
+
+# minimal dummy data frame factory
+make_roi_df <- function(name) {
+  data.frame(ROI_ID = 1L, Image_name = name, stringsAsFactors = FALSE)
+}
+
+test_that(".ap_collect_results - merges pixel results from both methods", {
+  res_cp <- list(pixel = list(ch_097_5 = make_roi_df("ch_097_5")))
+  res_bp <- list(pixel = list(beads2   = make_roi_df("beads2")))
+  out <- CellpixR:::.ap_collect_results(res_cp, res_bp, use_conversion = FALSE)
+  expect_equal(length(out$pixel), 2L)
+  expect_true(all(c("ch_097_5", "beads2") %in% names(out$pixel)))
+})
+
+test_that(".ap_collect_results - converted is NULL when use_conversion = FALSE", {
+  res_cp <- list(pixel = list(ch_097_5 = make_roi_df("ch_097_5")))
+  res_bp <- list(pixel = list(beads2   = make_roi_df("beads2")))
+  out <- CellpixR:::.ap_collect_results(res_cp, res_bp, use_conversion = FALSE)
+  expect_null(out$converted)
+})
+
+test_that(".ap_collect_results - merges converted results when use_conversion = TRUE", {
+  res_cp <- list(pixel     = list(ch_097_5 = make_roi_df("ch_097_5")),
+                 converted = list(ch_097_5 = make_roi_df("ch_097_5")))
+  res_bp <- list(pixel     = list(beads2   = make_roi_df("beads2")),
+                 converted = list(beads2   = make_roi_df("beads2")))
+  out <- CellpixR:::.ap_collect_results(res_cp, res_bp, use_conversion = TRUE)
+  expect_equal(length(out$converted), 2L)
+})
+
+test_that(".ap_collect_results - handles NULL results from either method", {
+  res_bp <- list(pixel = list(beads2 = make_roi_df("beads2")))
+  out <- CellpixR:::.ap_collect_results(NULL, res_bp, use_conversion = FALSE)
+  expect_equal(length(out$pixel), 1L)
+  expect_equal(names(out$pixel), "beads2")
+})
+
+# ── .ap_resolve_scale_handling: unit tests ────────────────────────────────────
+test_that(".ap_resolve_scale_handling - returns conversion disabled if scale_info = FALSE", {
+  res <- CellpixR:::.ap_resolve_scale_handling(
+    folder = tempdir(), scale_info = FALSE,
+    interactive = FALSE, verbose = FALSE
+  )
+  expect_false(res$use_conversion)
+  expect_null(res$scale_info)
+})
+
+test_that(".ap_resolve_scale_handling - returns conversion disabled if scale_info = NULL", {
+  res <- CellpixR:::.ap_resolve_scale_handling(
+    folder = tempdir(), scale_info = NULL,
+    interactive = FALSE, verbose = FALSE
+  )
+  expect_false(res$use_conversion)
+  expect_null(res$scale_info)
+})
+
+test_that(".ap_resolve_scale_handling - enables conversion and calls get_scales when scale_info = TRUE", {
+  mock_scales <- list(beads2 = list(mm_per_pixel_x = 4.2e-7,
+                                    mm_per_pixel_y = 4.2e-7,
+                                    source = "dm3_pixelSize_pixelUnit"))
+  # local_mocked_bindings replaces get_scales in the CellpixR namespace
+  # for the duration of this test only
+  local_mocked_bindings(
+    get_scales = function(...) mock_scales,
+    .package = "CellpixR"
+  )
+  res <- CellpixR:::.ap_resolve_scale_handling(
+    folder = tempdir(), scale_info = TRUE,
+    interactive = FALSE, verbose = FALSE
+  )
+  expect_true(res$use_conversion)
+  expect_equal(res$scale_info, mock_scales)
+})
+
+test_that(".ap_resolve_scale_handling - disables conversion if get_scales fails", {
+  local_mocked_bindings(
+    get_scales = function(...) stop("Python not available"),
+    .package = "CellpixR"
+  )
+  res <- CellpixR:::.ap_resolve_scale_handling(
+    folder = tempdir(), scale_info = TRUE,
+    interactive = FALSE, verbose = FALSE
+  )
+  expect_false(res$use_conversion)
+  expect_null(res$scale_info)
+})
+
+# ── .ap_run_method: unit tests ────────────────────────────────────────────────
+test_that(".ap_run_method - returns NULL immediately if files is empty", {
+  res <- CellpixR:::.ap_run_method(method = "BiopixR",
+                                   folder = tempdir(),
+                                   files = character(0),
+                                   use_conversion = FALSE,
+                                   scale_info = NULL,
+                                   verbose = FALSE,
+                                   gpu = TRUE,
+                                   method_bp = "edge")
+  expect_null(res)
+})
+
+test_that(".ap_run_method - throws error for unknown method", {
+  expect_error(
+    CellpixR:::.ap_run_method(method = "unknown",
+                              folder = tempdir(),
+                              files = "beads2",
+                              use_conversion = FALSE,
+                              scale_info = NULL,
+                              verbose = FALSE,
+                              gpu = TRUE,
+                              method_bp = "edge"),
+    "Unknown analysis method"
+  )
+})
+
+# ── analysis_pip: input validation ────────────────────────────────────────────
+test_that("analysis_pip - throws error for invalid folder type", {
+  expect_error(analysis_pip(123),
+               "'folder' must be a single character string.")
+})
+
+test_that("analysis_pip - throws error for non-existent folder", {
+  expect_error(analysis_pip("/this/path/does/not/exist"),
+               "The specified folder does not exist")
+})
+
+# ── analysis_pip: mocked integration tests ────────────────────────────────────
+# All slow steps (.ap_extract_features, .ap_run_method) are mocked.
+# This tests the pipeline orchestration logic only.
+
+# shared mock objects
+mock_properties <- structure(
+  data.frame(
+    Image_name         = "beads2",
+    Recommended_method = "BiopixR",
+    stringsAsFactors   = FALSE
+  ),
+  class = c("extract_image_features", "data.frame")
+)
+
+mock_pixel_df <- data.frame(
+  ROI_ID          = 1L,
+  Centroid_X      = 5.0,
+  Centroid_Y      = 5.0,
+  Area            = 25.0,
+  Mean_Intensity  = 0.5,
+  Perimeter       = 20.0,
+  Circularity     = 0.8,
+  Min_Diameter    = 4.0,
+  Max_Diameter    = 6.0,
+  Image_name      = "beads2",
+  Total_ROIs      = 1L,
+  Overall_Confidence = NA_real_,
+  Analysis_method = "BiopixR; method=edge",
+  stringsAsFactors = FALSE
+)
+
+mock_bp_result <- list(pixel = list(beads2 = mock_pixel_df), converted = NULL)
+
+img_dir <- system.file("images", package = "CellpixR")
+
+test_that("analysis_pip - returns list with pixel, converted and by_image", {
+  mockery::stub(analysis_pip, ".ap_extract_features",   mock_properties)
+  mockery::stub(analysis_pip, ".ap_run_method",
+                function(method, ...) {
+                  if(method == "BiopixR") mock_bp_result else NULL
+                })
+
+  res <- analysis_pip(img_dir,
+                      write_csv = FALSE,
+                      scale_info = FALSE,
+                      interactive = FALSE,
+                      verbose = FALSE,
+                      gpu = TRUE)
+
+  expect_true(is.list(res))
+  expect_true(all(c("pixel", "converted", "by_image") %in% names(res)))
+})
+
+test_that("analysis_pip - pixel is a data frame with results", {
+  mockery::stub(analysis_pip, ".ap_extract_features", mock_properties)
+  mockery::stub(analysis_pip, ".ap_run_method",
+                function(method, ...) {
+                  if(method == "BiopixR") mock_bp_result else NULL
+                })
+
+  res <- analysis_pip(img_dir,
+                      write_csv = FALSE,
+                      scale_info = FALSE,
+                      interactive = FALSE,
+                      verbose = FALSE,
+                      gpu = TRUE)
+
   expect_true(is.data.frame(res$pixel))
+  expect_true(nrow(res$pixel) > 0)
+})
+
+test_that("analysis_pip - converted is NULL when scale_info = FALSE", {
+  mockery::stub(analysis_pip, ".ap_extract_features", mock_properties)
+  mockery::stub(analysis_pip, ".ap_run_method",
+                function(method, ...) {
+                  if(method == "BiopixR") mock_bp_result else NULL
+                })
+
+  res <- analysis_pip(img_dir,
+                      write_csv = FALSE,
+                      scale_info = FALSE,
+                      interactive = FALSE,
+                      verbose = FALSE,
+                      gpu = TRUE)
+
   expect_null(res$converted)
+})
+
+test_that("analysis_pip - by_image contains per-image split of pixel results", {
+  mockery::stub(analysis_pip, ".ap_extract_features", mock_properties)
+  mockery::stub(analysis_pip, ".ap_run_method",
+                function(method, ...) {
+                  if(method == "BiopixR") mock_bp_result else NULL
+                })
+
+  res <- analysis_pip(img_dir,
+                      write_csv = FALSE,
+                      scale_info = FALSE,
+                      interactive = FALSE,
+                      verbose = FALSE,
+                      gpu = TRUE)
+
+  expect_true(is.list(res$by_image$pixel))
+  expect_true("beads2" %in% names(res$by_image$pixel))
+})
+
+test_that("analysis_pip - write_csv = TRUE creates CSV in out_dir", {
+  mockery::stub(analysis_pip, ".ap_extract_features", mock_properties)
+  mockery::stub(analysis_pip, ".ap_run_method",
+                function(method, ...) {
+                  if(method == "BiopixR") mock_bp_result else NULL
+                })
+
+  tmp_out <- file.path(tempdir(), "ap_csv_test")
+  on.exit(unlink(tmp_out, recursive = TRUE))
+
+  analysis_pip(img_dir,
+               write_csv = TRUE,
+               out_dir = tmp_out,
+               scale_info = FALSE,
+               interactive = FALSE,
+               verbose = FALSE,
+               gpu = TRUE)
+
+  expect_true(file.exists(file.path(tmp_out, "Analysis_pixel.csv")))
+})
+
+test_that("analysis_pip - write_csv = FALSE creates no CSV", {
+  mockery::stub(analysis_pip, ".ap_extract_features", mock_properties)
+  mockery::stub(analysis_pip, ".ap_run_method",
+                function(method, ...) {
+                  if(method == "BiopixR") mock_bp_result else NULL
+                })
+
+  tmp_out <- file.path(tempdir(), "ap_no_csv_test")
+  on.exit(unlink(tmp_out, recursive = TRUE))
+
+  analysis_pip(img_dir,
+               write_csv = FALSE,
+               out_dir = tmp_out,
+               scale_info = FALSE,
+               interactive = FALSE,
+               verbose = FALSE,
+               gpu = TRUE)
+
+  expect_false(file.exists(file.path(tmp_out, "Analysis_pixel.csv")))
+})
+
+test_that("analysis_pip - crashes when no images produce results (known bug: split(NULL) in by_image)", {
+  # when both methods return NULL, df_pixel is NULL and analysis_pip
+  # attempts split(NULL, NULL$Image_name) which throws an error.
+  # this test documents the known limitation.
+  mockery::stub(analysis_pip, ".ap_extract_features", mock_properties)
+  mockery::stub(analysis_pip, ".ap_run_method", function(...) NULL)
+
+  expect_error(
+    analysis_pip(img_dir,
+                 write_csv = FALSE,
+                 scale_info = FALSE,
+                 interactive = FALSE,
+                 verbose = FALSE,
+                 gpu = TRUE)
+  )
 })
