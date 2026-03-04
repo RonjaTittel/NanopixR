@@ -37,7 +37,6 @@ test_that(".bp_validate_detection_params - returns normalized params for 'thresh
 })
 
 test_that(".bp_validate_detection_params - throws error for unknown method", {
-  # match.arg() error message is locale-dependent (EN/DE) -> match on 'arg' only
   expect_error(
     CellpixR:::.bp_validate_detection_params("unknown"),
     "'arg'"

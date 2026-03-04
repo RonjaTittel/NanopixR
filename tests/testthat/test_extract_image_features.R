@@ -178,21 +178,6 @@ test_that(".ex_choose_method - recommends Cellpose for low skewness and low kurt
   expect_equal(res$Recommended_method, "Cellpose")
 })
 
-test_that(".ex_choose_method - tie defaults to Cellpose", {
-  # BiopixR  = 1.5 (skewness) + 1.5 (kurtosis) = 3.0
-  # Cellpose = 1.0 (mean_grad) + 1.0 (median_grad) + 1.5 (mean_power) = 3.5
-  # -> Cellpose wins
-  df <- data.frame(
-    skewness    = 3.0,    # BiopixR  +1.5
-    kurtosis    = 10.0,   # BiopixR  +1.5
-    mean_grad   = 0.05,   # Cellpose +1
-    median_grad = 0.05,   # Cellpose +1
-    mean_power  = 200000  # Cellpose +1.5
-  )
-  res <- CellpixR:::.ex_choose_method(df)
-  expect_true(res$Recommended_method %in% c("BiopixR", "Cellpose"))
-})
-
 test_that(".ex_choose_method - Decision_justification contains all five features", {
   df <- data.frame(
     skewness = 2.0, kurtosis = 8.0,

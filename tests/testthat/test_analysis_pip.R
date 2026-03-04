@@ -327,9 +327,6 @@ test_that("analysis_pip - write_csv = FALSE creates no CSV", {
 })
 
 test_that("analysis_pip - crashes when no images produce results (known bug: split(NULL) in by_image)", {
-  # when both methods return NULL, df_pixel is NULL and analysis_pip
-  # attempts split(NULL, NULL$Image_name) which throws an error.
-  # this test documents the known limitation.
   mockery::stub(analysis_pip, ".ap_extract_features", mock_properties)
   mockery::stub(analysis_pip, ".ap_run_method", function(...) NULL)
 

@@ -175,7 +175,6 @@ test_that("run_cellpose - numeric columns are actually numeric", {
 })
 
 # ── run_cellpose: save_masks and save_csv ─────────────────────────────────────
-# these tests require their own run to test side effects
 test_that("run_cellpose - save_csv = TRUE creates pixel CSV file", {
   skip_if_not(cellpose_available(), "Cellpose not available")
 
