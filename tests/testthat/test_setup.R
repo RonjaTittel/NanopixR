@@ -54,7 +54,7 @@ test_that("setup - returns NULL if setup_env() returns NULL", {
 # Its behaviour is therefore tested indirectly through setup_env() itself.
 
 # load setup_env() into a test environment
-script_path <- system.file("scripts", "setup_env.R", package = "CellpixR")
+script_path <- system.file("scripts", "setup_env.R", package = "NanopixR")
 skip_if(script_path == "", "setup_env.R script not found - skipping setup_env tests")
 env_setup <- new.env(parent = baseenv())
 sys.source(script_path, envir = env_setup)

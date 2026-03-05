@@ -68,7 +68,7 @@ and per-image result lists for flexible downstream analysis.
 }
 \examples{
 \dontrun{
-img_dir <- system.file("images", package = "CellpixR")
+img_dir <- system.file("images", package = "NanopixR")
 
 results <- analysis_pip(folder = img_dir,
   write_csv = TRUE,

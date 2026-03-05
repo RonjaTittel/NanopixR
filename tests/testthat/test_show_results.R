@@ -4,7 +4,7 @@
 #   - beads2.png  (copied from inst/images)
 #   - Results/beads2_bp_masks.tif  (synthetic dummy mask via ijtiff)
 #   - a minimal results_list data frame
-img_dir <- system.file("images", package = "CellpixR")
+img_dir <- system.file("images", package = "NanopixR")
 
 show_dir <- local({
   tmp <- file.path(tempdir(), "show_results_test")
@@ -197,7 +197,7 @@ test_that("show_results - download = FALSE creates no new files in Results/", {
 
 # ── .show_find_image_and_mask: unit tests ─────────────────────────────────────
 test_that(".show_find_image_and_mask - returns correct paths for beads2", {
-  res <- CellpixR:::.show_find_image_and_mask(show_dir, "beads2")
+  res <- NanopixR:::.show_find_image_and_mask(show_dir, "beads2")
   expect_true(all(c("img_path", "mask_path", "base") %in% names(res)))
   expect_true(file.exists(res$img_path))
   expect_true(file.exists(res$mask_path))
@@ -206,7 +206,7 @@ test_that(".show_find_image_and_mask - returns correct paths for beads2", {
 
 test_that(".show_find_image_and_mask - throws error if image not in folder", {
   expect_error(
-    CellpixR:::.show_find_image_and_mask(show_dir, "nonexistent"),
+    NanopixR:::.show_find_image_and_mask(show_dir, "nonexistent"),
     "Original image not found"
   )
 })
@@ -219,13 +219,13 @@ test_that(".show_find_image_and_mask - throws error if no mask file exists", {
   file.copy(file.path(img_dir, "beads2.png"), tmp_nomask)
 
   expect_error(
-    CellpixR:::.show_find_image_and_mask(tmp_nomask, "beads2"),
+    NanopixR:::.show_find_image_and_mask(tmp_nomask, "beads2"),
     "Mask not found for image"
   )
 })
 
 test_that(".show_find_image_and_mask - prefers bp mask over cp mask", {
   # folder already has a bp mask from shared fixture
-  res <- CellpixR:::.show_find_image_and_mask(show_dir, "beads2")
+  res <- NanopixR:::.show_find_image_and_mask(show_dir, "beads2")
   expect_true(grepl("_bp_masks\\.tif$", res$mask_path))
 })

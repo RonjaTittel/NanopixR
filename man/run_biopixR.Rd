@@ -89,7 +89,7 @@ the processing of a single do not abort the entire run.
 }
 \examples{
 \dontrun{
-img_dir <- system.file("images", package = "CellpixR")
+img_dir <- system.file("images", package = "NanopixR")
 
 results <- run_biopixR(
 folder = img_dir,

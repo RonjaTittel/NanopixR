@@ -2,7 +2,7 @@
 #' Interactive environment setup
 #'
 #'Runs an interactive setup assistant to configure the Python / *Cellpose*
-#'environment required for *CellpixR*. This function is intended for interactive
+#'environment required for *NanopixR*. This function is intended for interactive
 #'use only.
 #'
 #' @return Invisibly returns TRUE if the setup is completed successfully
@@ -15,7 +15,7 @@ setup <- function() {
   }
 
   # locate bundled setup script inside package
-  script <- system.file("scripts", "setup_env.R", package = "CellpixR")
+  script <- system.file("scripts", "setup_env.R", package = "NanopixR")
   if( script == "") {
     stop("Setup script not found", call. = FALSE)
   }

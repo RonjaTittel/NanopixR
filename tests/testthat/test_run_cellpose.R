@@ -20,7 +20,7 @@ test_that("run_cellpose - throws error for non-existent folder", {
 test_that("run_cellpose - throws error for invalid diameter", {
   skip_if_not(cellpose_available(), "Cellpose not available")
 
-  img_dir <- system.file("images", package = "CellpixR")
+  img_dir <- system.file("images", package = "NanopixR")
   expect_error(
     run_cellpose(img_dir, gpu = TRUE, diameter = -5,
                  save_masks = FALSE, save_csv = FALSE),
@@ -36,7 +36,7 @@ test_that("run_cellpose - throws error for invalid diameter", {
 test_that("run_cellpose - throws error when conversion = TRUE but scale_info is NULL", {
   skip_if_not(cellpose_available(), "Cellpose not available")
 
-  img_dir <- system.file("images", package = "CellpixR")
+  img_dir <- system.file("images", package = "NanopixR")
   expect_error(
     run_cellpose(img_dir,
                  gpu = TRUE,
@@ -51,7 +51,7 @@ test_that("run_cellpose - throws error when conversion = TRUE but scale_info is 
 test_that("run_cellpose - throws error if selected_files not found", {
   skip_if_not(cellpose_available(), "Cellpose not available")
 
-  img_dir <- system.file("images", package = "CellpixR")
+  img_dir <- system.file("images", package = "NanopixR")
   expect_error(
     run_cellpose(img_dir,
                  gpu = TRUE,
@@ -66,7 +66,7 @@ test_that("run_cellpose - throws error if selected_files not found", {
 test_that(".cp_import_cellpose_modules - returns list with all required modules", {
   skip_if_not(cellpose_available(), "Cellpose not available")
 
-  mods <- CellpixR:::.cp_import_cellpose_modules()
+  mods <- NanopixR:::.cp_import_cellpose_modules()
   expect_true(is.list(mods))
   expect_true(all(c("cellpose", "models", "io", "np") %in% names(mods)))
 })
@@ -75,7 +75,7 @@ test_that(".cp_import_cellpose_modules - returns list with all required modules"
 # run_cellpose() requires GPU + Python + Cellpose and is expensive.
 # Execute once with beads2.png only and reuse across all integration tests.
 
-img_dir <- system.file("images", package = "CellpixR")
+img_dir <- system.file("images", package = "NanopixR")
 
 beads_dir <- local({
   tmp <- file.path(tempdir(), "cp_beads_test")

@@ -1,52 +1,52 @@
 
 # ── .normalize_name: unit tests ───────────────────────────────────────────────
 test_that(".normalize_name - returns lowercase filename without extension", {
-  expect_equal(CellpixR:::.normalize_name("beads2.png"), "beads2")
-  expect_equal(CellpixR:::.normalize_name("ch_097_5.tif"), "ch_097_5")
+  expect_equal(NanopixR:::.normalize_name("beads2.png"), "beads2")
+  expect_equal(NanopixR:::.normalize_name("ch_097_5.tif"), "ch_097_5")
 })
 
 test_that(".normalize_name - converts uppercase to lowercase", {
-  expect_equal(CellpixR:::.normalize_name("Image_A.PNG"), "image_a")
+  expect_equal(NanopixR:::.normalize_name("Image_A.PNG"), "image_a")
 })
 
 test_that(".normalize_name - strips directory path and keeps filename only", {
-  expect_equal(CellpixR:::.normalize_name("/some/path/to/beads2.png"), "beads2")
+  expect_equal(NanopixR:::.normalize_name("/some/path/to/beads2.png"), "beads2")
 })
 
 test_that(".normalize_name - throws error for non-character input", {
-  expect_error(CellpixR:::.normalize_name(123),
+  expect_error(NanopixR:::.normalize_name(123),
                "path_or_name must be a character vector")
-  expect_error(CellpixR:::.normalize_name(NULL),
+  expect_error(NanopixR:::.normalize_name(NULL),
                "path_or_name must be a character vector")
 })
 
 # ── .unit_scale_factor: unit tests ────────────────────────────────────────────
 test_that(".unit_scale_factor - nm returns 1e-6", {
-  expect_equal(CellpixR:::.unit_scale_factor("nm"), 1e-6)
-  expect_equal(CellpixR:::.unit_scale_factor("NM"), 1e-6) # case-insensitive
+  expect_equal(NanopixR:::.unit_scale_factor("nm"), 1e-6)
+  expect_equal(NanopixR:::.unit_scale_factor("NM"), 1e-6) # case-insensitive
 })
 
 test_that(".unit_scale_factor - um returns 1e-3", {
-  expect_equal(CellpixR:::.unit_scale_factor("um"), 1e-3)
-  expect_equal(CellpixR:::.unit_scale_factor("\u00b5m"), 1e-3)
+  expect_equal(NanopixR:::.unit_scale_factor("um"), 1e-3)
+  expect_equal(NanopixR:::.unit_scale_factor("\u00b5m"), 1e-3)
 })
 
 test_that(".unit_scale_factor - mm returns 1", {
-  expect_equal(CellpixR:::.unit_scale_factor("mm"), 1)
-  expect_equal(CellpixR:::.unit_scale_factor("MM"), 1)
+  expect_equal(NanopixR:::.unit_scale_factor("mm"), 1)
+  expect_equal(NanopixR:::.unit_scale_factor("MM"), 1)
 })
 
 test_that(".unit_scale_factor - unsupported unit returns NA", {
-  expect_true(is.na(CellpixR:::.unit_scale_factor("px")))
-  expect_true(is.na(CellpixR:::.unit_scale_factor("cm")))
+  expect_true(is.na(NanopixR:::.unit_scale_factor("px")))
+  expect_true(is.na(NanopixR:::.unit_scale_factor("cm")))
 })
 
 test_that(".unit_scale_factor - NA input returns NA", {
-  expect_true(is.na(CellpixR:::.unit_scale_factor(NA)))
+  expect_true(is.na(NanopixR:::.unit_scale_factor(NA)))
 })
 
 test_that(".unit_scale_factor - empty string returns NA", {
-  expect_true(is.na(CellpixR:::.unit_scale_factor("")))
+  expect_true(is.na(NanopixR:::.unit_scale_factor("")))
 })
 
 # ── get_scales: input validation (no Python required) ─────────────────────────
@@ -91,7 +91,7 @@ test_that("get_scales - missing DM3 file sets source to 'no_dm3_found' and all v
   dir.create(tmp, showWarnings = FALSE)
   on.exit(unlink(tmp, recursive = TRUE))
 
-  img_dir <- system.file("images", package = "CellpixR")
+  img_dir <- system.file("images", package = "NanopixR")
   file.copy(file.path(img_dir, "beads2.png"), tmp)
 
   result <- get_scales(tmp)
@@ -118,7 +118,7 @@ test_that("get_scales - each result entry contains all 7 expected fields", {
   dir.create(tmp, showWarnings = FALSE)
   on.exit(unlink(tmp, recursive = TRUE))
 
-  img_dir <- system.file("images", package = "CellpixR")
+  img_dir <- system.file("images", package = "NanopixR")
   file.copy(file.path(img_dir, "beads2.png"), tmp)
 
   result <- get_scales(tmp)
@@ -139,7 +139,7 @@ test_that("get_scales - result is a named list with one entry per image", {
   dir.create(tmp, showWarnings = FALSE)
   on.exit(unlink(tmp, recursive = TRUE))
 
-  img_dir <- system.file("images", package = "CellpixR")
+  img_dir <- system.file("images", package = "NanopixR")
   file.copy(file.path(img_dir, "beads2.png"), tmp)
 
   result <- get_scales(tmp)
@@ -159,7 +159,7 @@ test_that("get_scales - list entry names are normalized (lowercase, no extension
   dir.create(tmp, showWarnings = FALSE)
   on.exit(unlink(tmp, recursive = TRUE))
 
-  img_dir <- system.file("images", package = "CellpixR")
+  img_dir <- system.file("images", package = "NanopixR")
   file.copy(file.path(img_dir, "beads2.png"), tmp)
 
   result <- get_scales(tmp)

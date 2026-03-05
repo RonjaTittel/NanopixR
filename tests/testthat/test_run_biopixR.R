@@ -1,7 +1,7 @@
 
 # ── .bp_validate_detection_params: unit tests ─────────────────────────────────
 test_that(".bp_validate_detection_params - returns normalized params for 'edge'", {
-  res <- CellpixR:::.bp_validate_detection_params("edge")
+  res <- NanopixR:::.bp_validate_detection_params("edge")
   expect_equal(res$method, "edge")
   expect_equal(res$alpha, "gaussian")
   expect_equal(res$sigma, "gaussian")
@@ -9,27 +9,27 @@ test_that(".bp_validate_detection_params - returns normalized params for 'edge'"
 })
 
 test_that(".bp_validate_detection_params - accepts numeric alpha and sigma for 'edge'", {
-  res <- CellpixR:::.bp_validate_detection_params("edge", alpha = 1.5, sigma = 2.0)
+  res <- NanopixR:::.bp_validate_detection_params("edge", alpha = 1.5, sigma = 2.0)
   expect_equal(res$alpha, 1.5)
   expect_equal(res$sigma, 2.0)
 })
 
 test_that(".bp_validate_detection_params - throws error for invalid alpha", {
   expect_error(
-    CellpixR:::.bp_validate_detection_params("edge", alpha = "invalid"),
+    NanopixR:::.bp_validate_detection_params("edge", alpha = "invalid"),
     "'alpha' must be numeric or 'gaussian'"
   )
 })
 
 test_that(".bp_validate_detection_params - throws error for invalid sigma", {
   expect_error(
-    CellpixR:::.bp_validate_detection_params("edge", sigma = "invalid"),
+    NanopixR:::.bp_validate_detection_params("edge", sigma = "invalid"),
     "'sigma' must be numeric or 'gaussian'"
   )
 })
 
 test_that(".bp_validate_detection_params - returns normalized params for 'threshold'", {
-  res <- CellpixR:::.bp_validate_detection_params("threshold")
+  res <- NanopixR:::.bp_validate_detection_params("threshold")
   expect_equal(res$method, "threshold")
   expect_null(res$alpha)
   expect_null(res$sigma)
@@ -38,91 +38,91 @@ test_that(".bp_validate_detection_params - returns normalized params for 'thresh
 
 test_that(".bp_validate_detection_params - throws error for unknown method", {
   expect_error(
-    CellpixR:::.bp_validate_detection_params("unknown"),
+    NanopixR:::.bp_validate_detection_params("unknown"),
     "'arg'"
   )
 })
 
 # ── .bp_validate_size_filter: unit tests ──────────────────────────────────────
 test_that(".bp_validate_size_filter - returns disabled filter when use = FALSE", {
-  res <- CellpixR:::.bp_validate_size_filter(use = FALSE)
+  res <- NanopixR:::.bp_validate_size_filter(use = FALSE)
   expect_false(res$use)
   expect_null(res$lowerlimit)
   expect_null(res$upperlimit)
 })
 
 test_that(".bp_validate_size_filter - defaults to 'auto' when use = TRUE and limits are NULL", {
-  res <- CellpixR:::.bp_validate_size_filter(use = TRUE)
+  res <- NanopixR:::.bp_validate_size_filter(use = TRUE)
   expect_true(res$use)
   expect_equal(res$lowerlimit, "auto")
   expect_equal(res$upperlimit, "auto")
 })
 
 test_that(".bp_validate_size_filter - accepts numeric limits", {
-  res <- CellpixR:::.bp_validate_size_filter(use = TRUE, lowerlimit = 10, upperlimit = 500)
+  res <- NanopixR:::.bp_validate_size_filter(use = TRUE, lowerlimit = 10, upperlimit = 500)
   expect_equal(res$lowerlimit, 10)
   expect_equal(res$upperlimit, 500)
 })
 
 test_that(".bp_validate_size_filter - throws error for invalid use argument", {
   expect_error(
-    CellpixR:::.bp_validate_size_filter(use = "yes"),
+    NanopixR:::.bp_validate_size_filter(use = "yes"),
     "'use_sizefilter' must be TRUE or FALSE."
   )
 })
 
 test_that(".bp_validate_size_filter - throws error for invalid lowerlimit", {
   expect_error(
-    CellpixR:::.bp_validate_size_filter(use = TRUE, lowerlimit = "big"),
+    NanopixR:::.bp_validate_size_filter(use = TRUE, lowerlimit = "big"),
     "'size_lowerlimit' must be numeric or 'auto'"
   )
 })
 
 test_that(".bp_validate_size_filter - throws error for invalid upperlimit", {
   expect_error(
-    CellpixR:::.bp_validate_size_filter(use = TRUE, upperlimit = "big"),
+    NanopixR:::.bp_validate_size_filter(use = TRUE, upperlimit = "big"),
     "'size_upperlimit' must be numeric or 'auto'"
   )
 })
 
 # ── .bp_validate_proximity_filter: unit tests ─────────────────────────────────
 test_that(".bp_validate_proximity_filter - returns disabled filter when use = FALSE", {
-  res <- CellpixR:::.bp_validate_proximity_filter(use = FALSE)
+  res <- NanopixR:::.bp_validate_proximity_filter(use = FALSE)
   expect_false(res$use)
   expect_null(res$radius)
   expect_null(res$elongation)
 })
 
 test_that(".bp_validate_proximity_filter - defaults to 'auto' radius and 2 elongation", {
-  res <- CellpixR:::.bp_validate_proximity_filter(use = TRUE)
+  res <- NanopixR:::.bp_validate_proximity_filter(use = TRUE)
   expect_true(res$use)
   expect_equal(res$radius, "auto")
   expect_equal(res$elongation, 2)
 })
 
 test_that(".bp_validate_proximity_filter - accepts numeric radius", {
-  res <- CellpixR:::.bp_validate_proximity_filter(use = TRUE, radius = 5, elongation = 3)
+  res <- NanopixR:::.bp_validate_proximity_filter(use = TRUE, radius = 5, elongation = 3)
   expect_equal(res$radius, 5)
   expect_equal(res$elongation, 3)
 })
 
 test_that(".bp_validate_proximity_filter - throws error for invalid use argument", {
   expect_error(
-    CellpixR:::.bp_validate_proximity_filter(use = "yes"),
+    NanopixR:::.bp_validate_proximity_filter(use = "yes"),
     "'use_proxfilter' must be TRUE or FALSE."
   )
 })
 
 test_that(".bp_validate_proximity_filter - throws error for invalid radius", {
   expect_error(
-    CellpixR:::.bp_validate_proximity_filter(use = TRUE, radius = "big"),
+    NanopixR:::.bp_validate_proximity_filter(use = TRUE, radius = "big"),
     "'prox_radius' must be numeric or 'auto'"
   )
 })
 
 test_that(".bp_validate_proximity_filter - throws error for non-numeric elongation", {
   expect_error(
-    CellpixR:::.bp_validate_proximity_filter(use = TRUE, elongation = "long"),
+    NanopixR:::.bp_validate_proximity_filter(use = TRUE, elongation = "long"),
     "'prox_elongation' must be a single numeric value"
   )
 })
@@ -135,17 +135,17 @@ test_that(".bp_prepare_image_table - stops if no image files match pattern", {
   writeLines("dummy", file.path(tmp, "dummy.txt"))
 
   expect_error(
-    CellpixR:::.bp_prepare_image_table(tmp,
+    NanopixR:::.bp_prepare_image_table(tmp,
                                        pattern = "\\.(png|jpg|jpeg|tif|tiff|bmp)$"),
     "No valid image files found|No files match"
   )
 })
 
 test_that(".bp_prepare_image_table - stops if selected_files not found", {
-  img_dir <- system.file("images", package = "CellpixR")
+  img_dir <- system.file("images", package = "NanopixR")
 
   expect_error(
-    CellpixR:::.bp_prepare_image_table(img_dir,
+    NanopixR:::.bp_prepare_image_table(img_dir,
                                        pattern = "\\.(png|jpg|jpeg|tif|tiff|bmp)$",
                                        selected_files = "nonexistent_image.png"),
     "None of the specified files were found"
@@ -153,9 +153,9 @@ test_that(".bp_prepare_image_table - stops if selected_files not found", {
 })
 
 test_that(".bp_prepare_image_table - filters to selected_files correctly", {
-  img_dir <- system.file("images", package = "CellpixR")
+  img_dir <- system.file("images", package = "NanopixR")
 
-  res <- CellpixR:::.bp_prepare_image_table(img_dir,
+  res <- NanopixR:::.bp_prepare_image_table(img_dir,
                                             pattern = "\\.(png|jpg|jpeg|tif|tiff|bmp)$",
                                             selected_files = "beads2.png")
   expect_equal(nrow(res), 1L)
@@ -174,7 +174,7 @@ test_that("run_biopixR - throws error for non-existent folder", {
 })
 
 test_that("run_biopixR - throws error if selected_files not found", {
-  img_dir <- system.file("images", package = "CellpixR")
+  img_dir <- system.file("images", package = "NanopixR")
   expect_error(
     run_biopixR(img_dir,
                 selected_files = "nonexistent.png",
@@ -186,7 +186,7 @@ test_that("run_biopixR - throws error if selected_files not found", {
 # ── Shared fixtures: run once, reuse across all integration tests ──────────────
 # run_biopixR is slow (~5 min per call) -> execute once and share the result
 
-img_dir <- system.file("images", package = "CellpixR")
+img_dir <- system.file("images", package = "NanopixR")
 
 beads_dir <- local({
   tmp <- file.path(tempdir(), "bp_beads_test")

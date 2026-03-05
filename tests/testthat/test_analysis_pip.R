@@ -4,18 +4,18 @@ test_that(".ap_validate_properties - passes for valid properties data frame", {
   df <- data.frame(Image_name = "beads2",
                    Recommended_method = "BiopixR",
                    stringsAsFactors = FALSE)
-  expect_true(CellpixR:::.ap_validate_properties(df))
+  expect_true(NanopixR:::.ap_validate_properties(df))
 })
 
 test_that(".ap_validate_properties - throws error if Image_name is missing", {
   df <- data.frame(Recommended_method = "BiopixR", stringsAsFactors = FALSE)
-  expect_error(CellpixR:::.ap_validate_properties(df),
+  expect_error(NanopixR:::.ap_validate_properties(df),
                "Properties is missing required columns")
 })
 
 test_that(".ap_validate_properties - throws error if Recommended_method is missing", {
   df <- data.frame(Image_name = "beads2", stringsAsFactors = FALSE)
-  expect_error(CellpixR:::.ap_validate_properties(df),
+  expect_error(NanopixR:::.ap_validate_properties(df),
                "Properties is missing required columns")
 })
 
@@ -31,7 +31,7 @@ test_that(".ap_group_images_by_method - correctly separates Cellpose and BiopixR
     file = c("/img/beads2.png", "/img/ch_097_5.png"),
     stringsAsFactors = FALSE
   )
-  res <- CellpixR:::.ap_group_images_by_method(properties, lookup)
+  res <- NanopixR:::.ap_group_images_by_method(properties, lookup)
   expect_equal(res$BiopixR, "beads2")
   expect_equal(res$Cellpose, "ch_097_5")
 })
@@ -47,7 +47,7 @@ test_that(".ap_group_images_by_method - returns empty vectors if no match", {
     file = "/img/beads2.png",
     stringsAsFactors = FALSE
   )
-  res <- CellpixR:::.ap_group_images_by_method(properties, lookup)
+  res <- NanopixR:::.ap_group_images_by_method(properties, lookup)
   expect_length(res$Cellpose, 0)
   expect_equal(res$BiopixR, "beads2")
 })
@@ -62,7 +62,7 @@ make_roi_df <- function(name) {
 test_that(".ap_collect_results - merges pixel results from both methods", {
   res_cp <- list(pixel = list(ch_097_5 = make_roi_df("ch_097_5")))
   res_bp <- list(pixel = list(beads2   = make_roi_df("beads2")))
-  out <- CellpixR:::.ap_collect_results(res_cp, res_bp, use_conversion = FALSE)
+  out <- NanopixR:::.ap_collect_results(res_cp, res_bp, use_conversion = FALSE)
   expect_equal(length(out$pixel), 2L)
   expect_true(all(c("ch_097_5", "beads2") %in% names(out$pixel)))
 })
@@ -70,7 +70,7 @@ test_that(".ap_collect_results - merges pixel results from both methods", {
 test_that(".ap_collect_results - converted is NULL when use_conversion = FALSE", {
   res_cp <- list(pixel = list(ch_097_5 = make_roi_df("ch_097_5")))
   res_bp <- list(pixel = list(beads2   = make_roi_df("beads2")))
-  out <- CellpixR:::.ap_collect_results(res_cp, res_bp, use_conversion = FALSE)
+  out <- NanopixR:::.ap_collect_results(res_cp, res_bp, use_conversion = FALSE)
   expect_null(out$converted)
 })
 
@@ -79,20 +79,20 @@ test_that(".ap_collect_results - merges converted results when use_conversion = 
                  converted = list(ch_097_5 = make_roi_df("ch_097_5")))
   res_bp <- list(pixel     = list(beads2   = make_roi_df("beads2")),
                  converted = list(beads2   = make_roi_df("beads2")))
-  out <- CellpixR:::.ap_collect_results(res_cp, res_bp, use_conversion = TRUE)
+  out <- NanopixR:::.ap_collect_results(res_cp, res_bp, use_conversion = TRUE)
   expect_equal(length(out$converted), 2L)
 })
 
 test_that(".ap_collect_results - handles NULL results from either method", {
   res_bp <- list(pixel = list(beads2 = make_roi_df("beads2")))
-  out <- CellpixR:::.ap_collect_results(NULL, res_bp, use_conversion = FALSE)
+  out <- NanopixR:::.ap_collect_results(NULL, res_bp, use_conversion = FALSE)
   expect_equal(length(out$pixel), 1L)
   expect_equal(names(out$pixel), "beads2")
 })
 
 # ── .ap_resolve_scale_handling: unit tests ────────────────────────────────────
 test_that(".ap_resolve_scale_handling - returns conversion disabled if scale_info = FALSE", {
-  res <- CellpixR:::.ap_resolve_scale_handling(
+  res <- NanopixR:::.ap_resolve_scale_handling(
     folder = tempdir(), scale_info = FALSE,
     interactive = FALSE, verbose = FALSE
   )
@@ -101,7 +101,7 @@ test_that(".ap_resolve_scale_handling - returns conversion disabled if scale_inf
 })
 
 test_that(".ap_resolve_scale_handling - returns conversion disabled if scale_info = NULL", {
-  res <- CellpixR:::.ap_resolve_scale_handling(
+  res <- NanopixR:::.ap_resolve_scale_handling(
     folder = tempdir(), scale_info = NULL,
     interactive = FALSE, verbose = FALSE
   )
@@ -113,13 +113,13 @@ test_that(".ap_resolve_scale_handling - enables conversion and calls get_scales 
   mock_scales <- list(beads2 = list(mm_per_pixel_x = 4.2e-7,
                                     mm_per_pixel_y = 4.2e-7,
                                     source = "dm3_pixelSize_pixelUnit"))
-  # local_mocked_bindings replaces get_scales in the CellpixR namespace
+  # local_mocked_bindings replaces get_scales in the NanopixR namespace
   # for the duration of this test only
   local_mocked_bindings(
     get_scales = function(...) mock_scales,
-    .package = "CellpixR"
+    .package = "NanopixR"
   )
-  res <- CellpixR:::.ap_resolve_scale_handling(
+  res <- NanopixR:::.ap_resolve_scale_handling(
     folder = tempdir(), scale_info = TRUE,
     interactive = FALSE, verbose = FALSE
   )
@@ -130,9 +130,9 @@ test_that(".ap_resolve_scale_handling - enables conversion and calls get_scales 
 test_that(".ap_resolve_scale_handling - disables conversion if get_scales fails", {
   local_mocked_bindings(
     get_scales = function(...) stop("Python not available"),
-    .package = "CellpixR"
+    .package = "NanopixR"
   )
-  res <- CellpixR:::.ap_resolve_scale_handling(
+  res <- NanopixR:::.ap_resolve_scale_handling(
     folder = tempdir(), scale_info = TRUE,
     interactive = FALSE, verbose = FALSE
   )
@@ -142,7 +142,7 @@ test_that(".ap_resolve_scale_handling - disables conversion if get_scales fails"
 
 # ── .ap_run_method: unit tests ────────────────────────────────────────────────
 test_that(".ap_run_method - returns NULL immediately if files is empty", {
-  res <- CellpixR:::.ap_run_method(method = "BiopixR",
+  res <- NanopixR:::.ap_run_method(method = "BiopixR",
                                    folder = tempdir(),
                                    files = character(0),
                                    use_conversion = FALSE,
@@ -155,7 +155,7 @@ test_that(".ap_run_method - returns NULL immediately if files is empty", {
 
 test_that(".ap_run_method - throws error for unknown method", {
   expect_error(
-    CellpixR:::.ap_run_method(method = "unknown",
+    NanopixR:::.ap_run_method(method = "unknown",
                               folder = tempdir(),
                               files = "beads2",
                               use_conversion = FALSE,
@@ -211,7 +211,7 @@ mock_pixel_df <- data.frame(
 
 mock_bp_result <- list(pixel = list(beads2 = mock_pixel_df), converted = NULL)
 
-img_dir <- system.file("images", package = "CellpixR")
+img_dir <- system.file("images", package = "NanopixR")
 
 test_that("analysis_pip - returns list with pixel, converted and by_image", {
   mockery::stub(analysis_pip, ".ap_extract_features",   mock_properties)

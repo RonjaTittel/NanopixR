@@ -49,7 +49,7 @@
 #' @examples
 #' \dontrun{
 #' # set folder
-#' img_dir <- system.file("images", package = "CellpixR")
+#' img_dir <- system.file("images", package = "NanopixR")
 #'
 #' # analyze the folder of microscopy images
 #' res <- extract_image_features(img_dir)

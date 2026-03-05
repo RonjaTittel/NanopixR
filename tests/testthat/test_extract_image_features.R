@@ -24,7 +24,7 @@ test_that("extract_image_features - input validation: empty folder throws error"
 })
 
 # ── Fixture: folder containing beads2.png ─────────────────────────────────────
-img_dir <- system.file("images", package = "CellpixR")
+img_dir <- system.file("images", package = "NanopixR")
 beads_dir <- local({
   tmp <- file.path(tempdir(), "beads_test")
   dir.create(tmp, showWarnings = FALSE)
@@ -162,7 +162,7 @@ test_that(".ex_choose_method - recommends BiopixR for high skewness and high kur
     median_grad = 0.0,   # < 0.01            -> BiopixR +1
     mean_power  = 5000   # < 100000          -> BiopixR +1.5
   )
-  res <- CellpixR:::.ex_choose_method(df)
+  res <- NanopixR:::.ex_choose_method(df)
   expect_equal(res$Recommended_method, "BiopixR")
 })
 
@@ -174,7 +174,7 @@ test_that(".ex_choose_method - recommends Cellpose for low skewness and low kurt
     median_grad = 0.05,   # 0.01 - 0.09       -> Cellpose +1
     mean_power  = 500000  # >= 100000         -> Cellpose +1.5
   )
-  res <- CellpixR:::.ex_choose_method(df)
+  res <- NanopixR:::.ex_choose_method(df)
   expect_equal(res$Recommended_method, "Cellpose")
 })
 
@@ -183,7 +183,7 @@ test_that(".ex_choose_method - Decision_justification contains all five features
     skewness = 2.0, kurtosis = 8.0,
     mean_grad = 0.01, median_grad = 0.005, mean_power = 50000
   )
-  res <- CellpixR:::.ex_choose_method(df)
+  res <- NanopixR:::.ex_choose_method(df)
   expect_match(res$Decision_justification, "Skewness")
   expect_match(res$Decision_justification, "Kurtosis")
   expect_match(res$Decision_justification, "mean_grad")
@@ -199,7 +199,7 @@ test_that(".ex_choose_method - processes multiple rows correctly", {
     median_grad = c(0.0,   0.05),
     mean_power  = c(5000,  500000)
   )
-  res <- CellpixR:::.ex_choose_method(df)
+  res <- NanopixR:::.ex_choose_method(df)
   expect_equal(nrow(res), 2L)
   expect_equal(res$Recommended_method[1], "BiopixR")
   expect_equal(res$Recommended_method[2], "Cellpose")

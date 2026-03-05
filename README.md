@@ -3,7 +3,7 @@
 Before running **any** analysis, run the **interactive** setup once: 
 
 ```{r}
-library(CellpixR)
+library(NanopixR)
 setup()
 ```
 
@@ -14,7 +14,7 @@ This configures the required Python / *Cellpose* environment.
 Please run at the beginning of **each** R Session:
 
 ```{r}
-library(CellpixR)
+library(NanopixR)
 setup()
 ```
 

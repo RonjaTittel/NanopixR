@@ -1,4 +1,4 @@
-Package: CellpixR
+Package: NanopixR
 Type: Package
 Title: automated analysis of nanoparticles for biotechnological applications
 Version: 0.1.0
@@ -22,7 +22,8 @@ Imports:
   DT
 Suggests:
   withr,
-  mockery
+  mockery,
+  GPareto
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.3

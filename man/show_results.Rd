@@ -58,7 +58,7 @@ identifiers derived from centroid positions.
 }
 \examples{
 \dontrun{
-img_dir <- system.file("images", package = "CellpixR")
+img_dir <- system.file("images", package = "NanopixR")
 
 show_results(results_list = results$pixel,
 folder = img_dir,

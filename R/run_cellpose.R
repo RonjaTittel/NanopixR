@@ -57,7 +57,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' img_dir <- system.file("images", package = "CellpixR")
+#' img_dir <- system.file("images", package = "NanopixR")
 #'
 #' results <- run_cellpose(
 #' folder = img_dir,
