@@ -52,7 +52,7 @@ A named list with the following elements:
  }
 }
 \description{
-\code{analysis_pip()} executes a full image analysis worklow on a folder
+\code{analysis_pip()} executes a full image analysis workflow on a folder
 of microscopy images. The function automatically extracts image features,
 recommends an appropriate analysis method ('Cellpose' or 'BiopixR'),
 optionally allows interactive overrides, executes the selected analyses and
