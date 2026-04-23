@@ -32,7 +32,7 @@ extracted automatically.}
 \item{interactive}{Logical; if \code{TRUE}, the user may interactively
 override recommended analysis methods or skip images.}
 
-\item{verbose}{Logical; controls console output and progress resporting.}
+\item{verbose}{Logical; controls console output and progress reporting.}
 
 \item{gpu}{Logical; if \code{TRUE}, GPU acceleration is enabled for
 'Cellpose'-based analysis (if available).}
@@ -43,12 +43,12 @@ use. Must be one of \code{"edge"} or \code{"threshold"}.}
 \value{
 A named list with the following elements:
 \describe{
- \item{pixel}{A data frame containing pixel-level measurments for all
+ \item{pixel}{A data frame containing pixel-level measurements for all
   analyzed images, or \code{NULL} if no object were detected.}
- \item{converted}{A data frame containing converted physical measurments
+ \item{converted}{A data frame containing converted physical measurements
    (e.g. in nanometers), or \code{NULL} if unit conversion was not applied.}
  \item{by_image}{A list of per-image result tables, split by image name,
- containing pixel-level and, if applicable, converted measurments.}
+ containing pixel-level and, if applicable, converted measurements.}
  }
 }
 \description{
@@ -57,7 +57,7 @@ of microscopy images. The function automatically extracts image features,
 recommends an appropriate analysis method ('Cellpose' or 'BiopixR'),
 optionally allows interactive overrides, executes the selected analyses and
 returns combined result tables. Pixel-level results and, if scale information
-is availavle, converted physical measurements can optionally be written to
+is available, converted physical measurements can optionally be written to
 disk
 }
 \details{
