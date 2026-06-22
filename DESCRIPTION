@@ -1,6 +1,6 @@
 Package: NanopixR
 Type: Package
-Title: automated analysis of nanoparticles for biotechnological applications
+Title: Automated Analysis of Nanoparticles for Biotechnological Applications
 Version: 0.1.0
 Authors@R: c(
     person(
@@ -9,9 +9,7 @@ Authors@R: c(
       role = c("aut", "cre")
     )
   )
-Description: Connection of functions of 'biopixR', the R package and 'Cellpose', an tool for python.
-    For easy use of both tools directly from R.
-    Tool for the automated analysis of regions of inteterest in differnet biotechnological pictures for various applications.
+Description: Provides an R-based workflow that connects functions from 'biopixR' (an R package) and 'Cellpose', a Python-based image segmentation tool. The package enables the direct use of both tools from R and supports the automated analysis of regions of interest in biotechnological images for various applications.
 License: LGPL (>=3)
 Imports: 
   EBImage,

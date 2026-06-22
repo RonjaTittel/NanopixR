@@ -1,11 +1,11 @@
 
 #' Interactive environment setup
 #'
-#'Runs an interactive setup assistant to configure the Python / *Cellpose*
-#'environment required for *NanopixR*. This function is intended for interactive
-#'use only.
+#' Runs an interactive setup assistant to configure the Python / *Cellpose*
+#' environment required for *NanopixR*. This function is intended for interactive
+#' use only.
 #'
-#' @return Invisibly returns TRUE if the setup is completed successfully
+#' @return Invisibly returns \code{TRUE} if the setup is completed successfully.
 #' @export
 setup <- function() {
 

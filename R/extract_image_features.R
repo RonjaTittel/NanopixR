@@ -1,16 +1,16 @@
 
 #' Extract image features and recommend an analysis method
 #'
-#' This function analzyses a folder of image files to extract interpretable
+#' This function analyzes a folder of image files to extract interpretable
 #' image characteristics based on intensity distributions, gradient
-#' infromation and frequency-domain properties.
+#' information, and frequency-domain properties.
 #'
 #' The extracted features are combined into a properties table and used to
 #' heuristically recommend an appropriate downstream image analysis method
-#' (e.g BiopixR or Cellpose) for each image.
+#' (e.g. BiopixR or Cellpose) for each image.
 #'
 #' The function does \emph{not} perform object detection or segmentation
-#' itself. Insted, it provides a data-driven preperation step to
+#' itself. Instead, it provides a data-driven preparation step to
 #' guide subsequent analysis workflows.
 #'
 #' @param folder Character string specifying the directory containing input images.
@@ -18,7 +18,7 @@
 #'  is written to a CSV file in \code{folder}. Default is \code{FALSE}.
 #' @param csv_name Character string. Name of the CSV file to be written when
 #'  \code{export_csv = TRUE}. Default is \code{"Properties.csv"}.
-#' @param round_digits Integer. Number of deicmal digits used to round numeric
+#' @param round_digits Integer. Number of decimal digits used to round numeric
 #'  feature values in the output table. Default is \code{5}.
 #' @param verbose Logical. If \code{TRUE}, progress messages are printed during
 #'  image loading and analysis. Default is \code{TRUE}.
@@ -30,7 +30,7 @@
 #'  \itemize{
 #'    \item normalized image names
 #'    \item color mode information
-#'    \item histogramm-based intensity features
+#'    \item histogram-based intensity features
 #'    \item gradient- and frequency-based features
 #'    \item a recommended analysis method
 #'    \item a textual justification for the recommendation
@@ -38,8 +38,8 @@
 #'
 #' @details
 #' Feature extraction is performed using a combination of histogram statistics,
-#' spatial gradient measures and frequency-domain descriptors. The final method
-#' recommendation is derived from weighted voting heruistics based on these
+#' spatial gradient measures, and frequency-domain descriptors. The final method
+#' recommendation is derived from weighted voting heuristics based on these
 #' features.
 #'
 #' Unreadable image files are skipped automatically.

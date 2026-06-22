@@ -1,20 +1,20 @@
 
-#' Extracting the scale information from DM3 files belonging to each image
+#' Extract scale information from DM3 files associated with each image
 #'
 #' Reads the pixel size and unit information from DM3 files associated with the
 #' image files in a folder and returns the scale information converted to
-#' millimeters per pixel
+#' millimeters per pixel.
 #'
-#' @param folder Path to the folder containing the image files and the corresponding DM3 files
-#' @return A named list. Each element corresponds to a image and contains:
+#' @param folder Path to the folder containing the image files and corresponding DM3 files
+#' @return A named list. Each element corresponds to an image and contains:
 #' \describe{
-#'  \item{scale_x}{Pixel size in x direction}
-#'  \item{scale_y}{Pixel size in y direction}
-#'  \item{unit_x}{Unit of pixel size in x direction}
-#'  \item{unit_y}{Unit of pixel size in y direction}
-#'  \item{mm_per_pixel_x}{Pixel size in millimeters in x direction}
-#'  \item{mm_per_pixel_y}{Pixel size in millimeters in y direction}
-#'  \item{source}{Source of the scale information}
+#'  \item{scale_x}{Pixel size in the x direction.}
+#'  \item{scale_y}{Pixel size in the y direction.}
+#'  \item{unit_x}{Unit of pixel size in the x direction.}
+#'  \item{unit_y}{Unit of pixel size in the y direction.}
+#'  \item{mm_per_pixel_x}{Pixel size in millimeters in the x direction.}
+#'  \item{mm_per_pixel_y}{Pixel size in millimeters in the y direction.}
+#'  \item{source}{Source of the scale information.}
 #'  }
 #' @export
 get_scales <- function(folder) {

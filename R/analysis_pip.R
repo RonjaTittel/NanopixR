@@ -8,14 +8,13 @@
 #' optionally allows interactive overrides, executes the selected analyses and
 #' returns combined result tables. Pixel-level results and, if scale information
 #' is available, converted physical measurements can optionally be written to
-#' disk
+#' disk.
 #'
-#' @param folder Character string specifying the directory containing input
-#'  images.
+#' @param folder Character string specifying the directory containing input images.
 #' @param write_csv Logical; if \code{TRUE}, combined result tables are written
 #'  to CSV files in \code{out_dir}
 #' @param out_dir Character string specifying the output directory for results.
-#'  Defaults to a sub directory named \code{"Results"} inside \code{folder}.
+#'  Defaults to a subdirectory named \code{"Results"} inside \code{folder}.
 #' @param scale_info Logical; controls whether scale information should be used
 #'  for unit conversion. If \code{TRUE}, available scale information is
 #'  extracted automatically.
@@ -23,13 +22,13 @@
 #'  override recommended analysis methods or skip images.
 #' @param verbose Logical; controls console output and progress reporting.
 #' @param gpu Logical; if \code{TRUE}, GPU acceleration is enabled for
-#'  'Cellpose'-based analysis (if available).
-#' @param method_bp Character string specifying the BiopixR analysis method to
+#'  'Cellpose'-based analysis, if available.
+#' @param method_bp Character string specifying the 'BiopixR' analysis method to
 #'  use. Must be one of \code{"edge"} or \code{"threshold"}.
 #'
 #' @details
 #' The function orchestrates feature extraction, method recommendation,
-#' optional interactive decision-making, execution of analysis backends and
+#' optional interactive decision-making, execution of analysis backends, and
 #' result aggregation. The returned object provides both combined result tables
 #' and per-image result lists for flexible downstream analysis.
 #'
@@ -37,7 +36,7 @@
 #' @returns A named list with the following elements:
 #' \describe{
 #'  \item{pixel}{A data frame containing pixel-level measurements for all
-#'   analyzed images, or \code{NULL} if no object were detected.}
+#'   analyzed images, or \code{NULL} if no objects were detected.}
 #'  \item{converted}{A data frame containing converted physical measurements
 #'    (e.g. in nanometers), or \code{NULL} if unit conversion was not applied.}
 #'  \item{by_image}{A list of per-image result tables, split by image name,

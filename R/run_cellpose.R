@@ -1,15 +1,16 @@
 
 #' Run 'Cellpose'-based image segmentation and ROI analysis
 #'
-#' Performing image segmentation using the 'Cellpose' deep learning framework and
-#' computing region-of-interest (ROI) statistics for the detected objects. Optionally
-#' Converting the results from pixel units to physical units and writting to disk.
+#' Performs image segmentation using the 'Cellpose' deep-learning framework and
+#' computes region-of-interest (ROI) statistics for the detected objects.
+#' Optionally, results can be converted from pixel units to physical units and
+#' written to disk.
 #'
-#' Workglow consisting of these steps:
+#' Workflow consisting of the following steps:
 #' \enumerate{
 #' \item Load input images from directory.
 #' \item Run 'Cellpose' segmentation on each image.
-#' \item Optionally save segmentation masks ti disk.
+#' \item Optionally save segmentation masks to disk.
 #' \item Compute intensity-based and geometric ROI statistics.
 #' \item Optionally convert ROI measurements to physical units.
 #' \item Optionally write results to CSV files.
@@ -17,13 +18,13 @@
 #'
 #' @param folder Character string specifying the directory containing input images.
 #' @param output_dir Character string specifying the output directory for results.
-#'  Defaults to a sub directory named \code{"Results"} inside \code{folder}.
+#'  Defaults to a subdirectory named \code{"Results"} inside \code{folder}.
 #' @param selected_files Optional character vector specifying a subset of images
 #'  to analyze. If \code{NULL}, all images in \code{folder} are processed.
 #'
-#' @param gpu Logical; whether to enable GPU acceleration for 'Cellpose' (highly recommended)
+#' @param gpu Logical; whether to enable GPU acceleration for 'Cellpose' (highly recommended).
 #'  Defaults to \code{FALSE}.
-#' @param diameter Numeric scalar specifying the approximate object diameter in  pixels.
+#' @param diameter Numeric scalar specifying the approximate object diameter in pixels.
 #'  If \code{NULL}, 'Cellpose' automatically estimates the diameter.
 #' @param model_path Optional path to a custom 'Cellpose' model. If \code{NULL}, the
 #'  standard pretrained 'Cellpose' model is used.
@@ -31,14 +32,14 @@
 #' @param conversion Logical; whether to convert pixel-based ROI measurements to
 #'  physical units. Defaults to \code{FALSE}.
 #' @param scale_info Named list containing image-specific scale information
-#'  required for unit conversion. Must be provided f \code{conversion = TRUE}.
+#'  required for unit conversion. Must be provided if \code{conversion = TRUE}.
 #'
 #' @param save_masks Logical; whether to save segmentation masks to disk.
 #'  Defaults to \code{TRUE}.
-#' @param save_csv Logical; whether to write ROI statistices to CSV files.
+#' @param save_csv Logical; whether to write ROI statistics to CSV files.
 #'  Defaults to \code{TRUE}.
 #'
-#' @return A list containg the analysis results.
+#' @return A list containing the analysis results.
 #' \describe{
 #' \item{pixel}{A named list of data frames containing ROI statistics in pixel units.}
 #' \item{converted}{A named list of data frames containing ROI statistics in
@@ -46,9 +47,9 @@
 #'  }
 #'
 #' @details
-#' Segmentation is performed using the 'Cellpose' Python package via the \pkg{reticulte}
+#' Segmentation is performed using the 'Cellpose' Python package via the \pkg{reticulate}
 #' interface. ROI statistics include object area, mean intensity, perimeter,
-#' circularity, minimum and maximum diameter, centroid coordinates and confidence
+#' circularity, minimum and maximum diameter, centroid coordinates, and confidence
 #' measures derived from 'Cellpose' outputs.
 #'
 #' Images for which no objects are detected are omitted from the results.
