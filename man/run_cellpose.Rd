@@ -21,15 +21,15 @@ run_cellpose(
 \item{folder}{Character string specifying the directory containing input images.}
 
 \item{output_dir}{Character string specifying the output directory for results.
-Defaults to a sub directory named \code{"Results"} inside \code{folder}.}
+Defaults to a subdirectory named \code{"Results"} inside \code{folder}.}
 
 \item{selected_files}{Optional character vector specifying a subset of images
 to analyze. If \code{NULL}, all images in \code{folder} are processed.}
 
-\item{gpu}{Logical; whether to enable GPU acceleration for 'Cellpose' (highly recommended)
+\item{gpu}{Logical; whether to enable GPU acceleration for 'Cellpose' (highly recommended).
 Defaults to \code{FALSE}.}
 
-\item{diameter}{Numeric scalar specifying the approximate object diameter in  pixels.
+\item{diameter}{Numeric scalar specifying the approximate object diameter in pixels.
 If \code{NULL}, 'Cellpose' automatically estimates the diameter.}
 
 \item{model_path}{Optional path to a custom 'Cellpose' model. If \code{NULL}, the
@@ -39,16 +39,16 @@ standard pretrained 'Cellpose' model is used.}
 physical units. Defaults to \code{FALSE}.}
 
 \item{scale_info}{Named list containing image-specific scale information
-required for unit conversion. Must be provided f \code{conversion = TRUE}.}
+required for unit conversion. Must be provided if \code{conversion = TRUE}.}
 
 \item{save_masks}{Logical; whether to save segmentation masks to disk.
 Defaults to \code{TRUE}.}
 
-\item{save_csv}{Logical; whether to write ROI statistices to CSV files.
+\item{save_csv}{Logical; whether to write ROI statistics to CSV files.
 Defaults to \code{TRUE}.}
 }
 \value{
-A list containg the analysis results.
+A list containing the analysis results.
 \describe{
 \item{pixel}{A named list of data frames containing ROI statistics in pixel units.}
 \item{converted}{A named list of data frames containing ROI statistics in
@@ -56,25 +56,26 @@ A list containg the analysis results.
  }
 }
 \description{
-Performing image segmentation using the 'Cellpose' deep learning framework and
-computing region-of-interest (ROI) statistics for the detected objects. Optionally
-Converting the results from pixel units to physical units and writting to disk.
+Performs image segmentation using the 'Cellpose' deep-learning framework and
+computes region-of-interest (ROI) statistics for the detected objects.
+Optionally, results can be converted from pixel units to physical units and
+written to disk.
 }
 \details{
-Workglow consisting of these steps:
+Workflow consisting of the following steps:
 \enumerate{
 \item Load input images from directory.
 \item Run 'Cellpose' segmentation on each image.
-\item Optionally save segmentation masks ti disk.
+\item Optionally save segmentation masks to disk.
 \item Compute intensity-based and geometric ROI statistics.
 \item Optionally convert ROI measurements to physical units.
 \item Optionally write results to CSV files.
 }
 
 
-Segmentation is performed using the 'Cellpose' Python package via the \pkg{reticulte}
+Segmentation is performed using the 'Cellpose' Python package via the \pkg{reticulate}
 interface. ROI statistics include object area, mean intensity, perimeter,
-circularity, minimum and maximum diameter, centroid coordinates and confidence
+circularity, minimum and maximum diameter, centroid coordinates, and confidence
 measures derived from 'Cellpose' outputs.
 
 Images for which no objects are detected are omitted from the results.

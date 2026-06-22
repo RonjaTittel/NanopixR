@@ -7,7 +7,7 @@
 setup()
 }
 \value{
-Invisibly returns TRUE if the setup is completed successfully
+Invisibly returns \code{TRUE} if the setup is completed successfully.
 }
 \description{
 Runs an interactive setup assistant to configure the Python / *Cellpose*

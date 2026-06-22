@@ -2,7 +2,7 @@
 % Please edit documentation in R/run_biopixR.R
 \name{run_biopixR}
 \alias{run_biopixR}
-\title{Run image-based object analysis using 'biopixR'}
+\title{Run image-based object analysis using 'BiopixR'}
 \usage{
 run_biopixR(
   folder,
@@ -26,7 +26,7 @@ run_biopixR(
 \item{folder}{Character string specifying the directory containing input images.}
 
 \item{output_dir}{Character string specifying the output directory for results.
-Defaults to a sub directory named \code{"Results"} inside \code{folder}.}
+Defaults to a subdirectory named \code{"Results"} inside \code{folder}.}
 
 \item{selected_files}{Optional character vector specifying a subset of images
 to analyze. If \code{NULL}, all images in \code{folder} are processed.}
@@ -34,35 +34,35 @@ to analyze. If \code{NULL}, all images in \code{folder} are processed.}
 \item{method}{Character string. Object detection method to use.
 Either \code{"edge"} or \code{"threshold"}.}
 
-\item{alpha}{Numeric value or \code{"gaussian"}. Edge detection paramter
+\item{alpha}{Numeric value or \code{"gaussian"}. Edge detection parameter
 used when \code{method = "edge"}.}
 
-\item{sigma}{Numeric value or \code{"gaussian"}. Smoothing paramter
+\item{sigma}{Numeric value or \code{"gaussian"}. Smoothing parameter
 used when \code{method = "edge"}.}
 
-\item{use_sizefilter}{Logical. If \code{TRUE}, applies size-based
+\item{use_sizefilter}{Logical. If \code{TRUE}, applies a size-based
 object filter after detection.}
 
 \item{size_lowerlimit}{Numeric value or \code{"auto"}. Lower size limit
-for the size filter detection.}
+for the size filter.}
 
 \item{size_upperlimit}{Numeric value or \code{"auto"}. Upper size limit
-for the size filter detection.}
+for the size filter.}
 
 \item{use_proxfilter}{Logical. If \code{TRUE}, applies a proximity-based
 object filter after detection.}
 
 \item{prox_radius}{Numeric value or \code{"auto"}. Radius parameter
-for the proximity filter detection.}
+for the proximity filter.}
 
 \item{prox_elongation}{Numeric value. Elongation parameter for the
-proximity filter detection.}
+proximity filter.}
 
 \item{conversion}{Logical; whether to convert pixel-based ROI measurements to
 physical units. Defaults to \code{FALSE}.}
 
 \item{scale_info}{Named list containing image-specific scale information
-required for unit conversion. Must be provided f \code{conversion = TRUE}.}
+required for unit conversion. Must be provided if \code{conversion = TRUE}.}
 
 \item{write_results}{Logical. If \code{TRUE}, writes result tables to disk
 as CSV files.}
@@ -70,7 +70,7 @@ as CSV files.}
 \value{
 A list with the following elements:
  \describe{
-   \item{pixel}{Named list of data frames containing pixel based
+   \item{pixel}{Named list of data frames containing pixel-based
      measurements for each image.}
    \item{converted}{Named list of data frames containing converted
      measurements, or \code{NULL} if conversion is disabled.}
@@ -80,12 +80,12 @@ A list with the following elements:
 \description{
 Runs a complete 'biopixR' analysis pipeline on a folder of images.
 The function prepares the images, performs object detection and optional
-post-processing filters, extracts pixel- and region-level measurements and
+post-processing filters, extracts pixel- and region-level measurements, and
 optionally writes result tables to disk.
 }
 \details{
-The analysis is performed independently for each image. Errors occuring during
-the processing of a single do not abort the entire run.
+The analysis is performed independently for each image. Errors occurring during
+the processing of a single image do not abort the entire run.
 }
 \examples{
 \dontrun{
